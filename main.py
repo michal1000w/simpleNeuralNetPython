@@ -209,22 +209,26 @@ class Matrix:
         helper = []
 
         z = 0
-        for i in range(y):
-            rowList = []
-            for j in range(x):
-                rowList.append(self.mat[i][j] + o.mat[i][j])
-                z += 1
-            helper.append(rowList)
 
-        data = ""
-        for i in range(y):
-            data += "["
-            for j in range(x):
-                data += str(helper[i][j])
-                if (j < x-1):
-                    data += ","
-            data += "]"
+        try:    
+            for i in range(y):
+                rowList = []
+                for j in range(x):
+                    rowList.append(self.mat[i][j] + o.mat[i][j])
+                    z += 1
+                helper.append(rowList)
 
+            data = ""
+            for i in range(y):
+                data += "["
+                for j in range(x):
+                    data += str(helper[i][j])
+                    if (j < x-1):
+                        data += ","
+                data += "]"
+        except:
+            data = "[]"
+            print("Błąd przy dodawaniu")
 
         return Matrix(data)
 
@@ -235,22 +239,25 @@ class Matrix:
         helper = []
 
         z = 0
-        for i in range(y):
-            rowList = []
-            for j in range(x):
-                rowList.append(self.mat[i][j] - o.mat[i][j])
-                z += 1
-            helper.append(rowList)
+        try:    
+            for i in range(y):
+                rowList = []
+                for j in range(x):
+                    rowList.append(self.mat[i][j] - o.mat[i][j])
+                    z += 1
+                helper.append(rowList)
 
-        data = ""
-        for i in range(y):
-            data += "["
-            for j in range(x):
-                data += str(helper[i][j])
-                if (j < x-1):
-                    data += ","
-            data += "]"
-
+            data = ""
+            for i in range(y):
+                data += "["
+                for j in range(x):
+                    data += str(helper[i][j])
+                    if (j < x-1):
+                        data += ","
+                data += "]"
+        except:
+            data = "[]"
+            print("Błąd przy odejmowaniu")
 
         return Matrix(data)
 
@@ -267,6 +274,10 @@ m.printMatrix()
 
 #m.sigmoid().printMatrix()
 #m.sigmoid_derivative().printMatrix()
+
+c = Matrix("[2,3,6,7][4,5,8,9]")
+
+(c-m).printMatrix()
 
 (m + m).printMatrix()
 (m - m).printMatrix()
