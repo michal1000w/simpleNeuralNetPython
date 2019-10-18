@@ -1,5 +1,6 @@
 import random
 import time
+import math
 
 
 class Matrix:
@@ -114,6 +115,44 @@ class Matrix:
         #print(data)
         return Matrix(data)
 
+    def exp(self,inverted = False):
+        E = 1.78107
+
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0
+        for i in range(y):
+            rowList = []
+            for j in range(x):
+                rowList.append(" ")
+                z += 1
+            helper.append(rowList)
+
+        if (inverted):
+            for i in range(y):
+                for j in range(x):
+                    helper[i][j] = str(math.exp(-self.mat[i][j]))
+        else :
+            for i in range(y):
+                for j in range(x):
+                    helper[i][j] = str(math.exp(self.mat[i][j]))
+
+        #print(helper)
+
+        data = ""
+        for i in range(y):
+            data += "["
+            for j in range(x):
+                data += helper[i][j]
+                if (j < x-1):
+                    data += ","
+            data += "]"
+
+        #print(data)
+        return Matrix(data)
 
 
 #main
@@ -122,4 +161,6 @@ m = Matrix("[1,6,5][2,4,3]")
 #m.print()
 m.printMatrix()
 
-m.T().printMatrix()
+#m.T().printMatrix()
+m.exp().printMatrix()
+m.exp(True).printMatrix()
