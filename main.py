@@ -1,13 +1,14 @@
-import os
 import random
+import time
 
-class Matrix():
-    #zmienne ogólnoklasowe
-    mat = []
-    wiersze = 0
-    kolumny = 0
 
-    def __init__(self,data):
+class Matrix:
+    #podstawowe funkcje
+
+    def __init__(self,data:str):
+        self.mat = []
+        self.wiersze = 0
+        self.kolumny = 0
         #"[1,2,1.4][3,9,3][41,2,55]"
 
         #zmienne początkowe
@@ -61,6 +62,8 @@ class Matrix():
                 z += 1
             self.mat.append(rowList)
 
+        wartosci.clear()
+        fragmenty.clear()
 
     def print(self):
         print(self.mat)
@@ -78,9 +81,45 @@ class Matrix():
                     print("",self.mat[i][j],",",end="",flush=True)
             print("",flush=True)
 
+    #matma
+    def T(self):
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0
+        for i in range(x):
+            rowList = []
+            for j in range(y):
+                rowList.append(" ")
+                z += 1
+            helper.append(rowList)
+
+        for j in range(y):
+            for i in range(x):
+                helper[i][j] = str(self.mat[j][i])
+
+        #print(helper)
+
+        data = ""
+        for i in range(x):
+            data += "["
+            for j in range(y):
+                data += helper[i][j]
+                if (j < y-1):
+                    data += ","
+            data += "]"
+
+        #print(data)
+        return Matrix(data)
+
+
 
 #main
 
-m = Matrix("[1,6][2,4]")
+m = Matrix("[1,6,5][2,4,3]")
 #m.print()
 m.printMatrix()
+
+m.T().printMatrix()
