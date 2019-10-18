@@ -228,6 +228,32 @@ class Matrix:
 
         return Matrix(data)
 
+    def __sub__(self, o):
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0
+        for i in range(y):
+            rowList = []
+            for j in range(x):
+                rowList.append(self.mat[i][j] - o.mat[i][j])
+                z += 1
+            helper.append(rowList)
+
+        data = ""
+        for i in range(y):
+            data += "["
+            for j in range(x):
+                data += str(helper[i][j])
+                if (j < x-1):
+                    data += ","
+            data += "]"
+
+
+        return Matrix(data)
+
 
 #main
 
@@ -243,3 +269,4 @@ m.printMatrix()
 #m.sigmoid_derivative().printMatrix()
 
 (m + m).printMatrix()
+(m - m).printMatrix()
