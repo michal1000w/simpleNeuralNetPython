@@ -185,13 +185,9 @@ class Matrix:
         for i in range(y):
             rowList = []
             for j in range(x):
-                rowList.append(" ")
+                rowList.append(self.mat[i][j] * (1 - self.mat[i][j]))
                 z += 1
             helper.append(rowList)
-
-        for i in range(y):
-            for j in range(x):
-                helper[i][j] = self.mat[i][j] * (1 - self.mat[i][j])
 
         data = ""
         for i in range(y):
@@ -205,6 +201,34 @@ class Matrix:
 
         return Matrix(data)
 
+    #przeciążenia operatorów
+    def __add__(self, o):
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0
+        for i in range(y):
+            rowList = []
+            for j in range(x):
+                rowList.append(self.mat[i][j] + o.mat[i][j])
+                z += 1
+            helper.append(rowList)
+
+        data = ""
+        for i in range(y):
+            data += "["
+            for j in range(x):
+                data += str(helper[i][j])
+                if (j < x-1):
+                    data += ","
+            data += "]"
+
+
+        return Matrix(data)
+
+
 #main
 
 m = Matrix("[1,6,5][2,4,3]")
@@ -215,6 +239,7 @@ m.printMatrix()
 #m.exp().printMatrix()
 #m.exp(True).printMatrix()
 
-m.sigmoid().printMatrix()
+#m.sigmoid().printMatrix()
+#m.sigmoid_derivative().printMatrix()
 
-m.sigmoid_derivative().printMatrix()
+(m + m).printMatrix()
