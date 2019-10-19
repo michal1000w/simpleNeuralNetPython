@@ -41,12 +41,35 @@ class NeuralNetwork:
                 print("[",self.nazwy[i],"]", end="")
         print("")
 
+    def print_names(self):
+        print("Stored names: ", end="")
+        for i in range(len(self.nazwy)):
+            print("[",self.nazwy[i],"]",end="")
+        print("")
+
+    def add_names(self,data:str):
+        #podział na pojedyńcze macierze (fragmenty)
+        length = len(data)
+        fragment = ""
+
+        for i in range(length):
+            if (data[i] == '['):
+                fragment = ""
+                while (i < length - 1):
+                    i += 1
+                    if (data[i] == ']'):
+                        break
+                    fragment += data[i]
+                self.nazwy.append(fragment)
 
 
 #main
 
 n = NeuralNetwork(3,2,1)
 n.print_synaptic_weights()
+
+n.add_names("[piesek][kotek]")
+n.print_names()
 
 '''m = Matrix.Matrix("[1,6,5][2,4,3]")
 #m.print()
