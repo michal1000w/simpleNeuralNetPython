@@ -3,65 +3,71 @@ import math
 class Matrix:
     #podstawowe funkcje
 
-    def __init__(self,data:str):
-        self.mat = []
-        self.wiersze = 0
-        self.kolumny = 0
-        #"[1,2,1.4][3,9,3][41,2,55]"
+    def __init__(self,data:str,wiersze = 0,kolumny = 0,mat = []):
 
-        #zmienne początkowe
-        length = len(data)
-        fragment = ""
-        fragmenty = []
+        if (not(wiersze == 0 and kolumny == 0 and mat == [])):
+            self.wiersze = wiersze
+            self.kolumny = kolumny
+            self.mat = mat
+        else:   
+            self.mat = []
+            self.wiersze = 0
+            self.kolumny = 0
+            #"[1,2,1.4][3,9,3][41,2,55]"
 
-        for i in range(length):
-            if (data[i] == '['):
-                fragment = ""
-                while (i < length - 1):
-                    i += 1
-                    if (data[i] == ']'):
-                        break
-                    fragment += data[i]
-                fragmenty.append(fragment)
+            #zmienne początkowe
+            length = len(data)
+            fragment = ""
+            fragmenty = []
 
-        self.wiersze = len(fragmenty)
-        #print(fragmenty)
-        
-        #podział fragmentów na pojedyńcze elementy i sprawdzanie ilości kolumn
-        wartosci = []
-        elementy = 0
+            for i in range(length):
+                if (data[i] == '['):
+                    fragment = ""
+                    while (i < length - 1):
+                        i += 1
+                        if (data[i] == ']'):
+                            break
+                        fragment += data[i]
+                    fragmenty.append(fragment)
 
-        for i in range(self.wiersze):
-            length = len(fragmenty[i]) #długość stringa
+            self.wiersze = len(fragmenty)
+            #print(fragmenty)
+            
+            #podział fragmentów na pojedyńcze elementy i sprawdzanie ilości kolumn
+            wartosci = []
+            elementy = 0
 
-            j1 = 0
-            while(j1 < length):
-                fragment = ""
-                while (fragmenty[i][j1] != ',' and j1 < length):
-                    fragment += fragmenty[i][j1]
+            for i in range(self.wiersze):
+                length = len(fragmenty[i]) #długość stringa
+
+                j1 = 0
+                while(j1 < length):
+                    fragment = ""
+                    while (fragmenty[i][j1] != ',' and j1 < length):
+                        fragment += fragmenty[i][j1]
+                        j1 += 1
+                        if (j1 == length):
+                            break
+                    if (fragment != ""):
+                        wartosci.append(float(fragment))
                     j1 += 1
-                    if (j1 == length):
-                        break
-                if (fragment != ""):
-                    wartosci.append(float(fragment))
-                j1 += 1
 
-            if (i==0):
-                elementy = len(wartosci)
+                if (i==0):
+                    elementy = len(wartosci)
 
-        self.kolumny = elementy
+            self.kolumny = elementy
 
-        #przenoszenie wartości do macierzy
-        z = 0
-        for i in range(self.wiersze):
-            rowList = []
-            for j in range(self.kolumny):
-                rowList.append(wartosci[z])
-                z += 1
-            self.mat.append(rowList)
+            #przenoszenie wartości do macierzy
+            z = 0
+            for i in range(self.wiersze):
+                rowList = []
+                for j in range(self.kolumny):
+                    rowList.append(wartosci[z])
+                    z += 1
+                self.mat.append(rowList)
 
-        wartosci.clear()
-        fragmenty.clear()
+            wartosci.clear()
+            fragmenty.clear()
 
     def print(self):
         print(self.mat)
@@ -165,25 +171,12 @@ class Matrix:
 
         for j in range(y):
             for i in range(x):
-                helper[i][j] = str(self.mat[j][i])
+                helper[i][j] = self.mat[j][i]
 
         #print(helper)
-
-        data = ""
-        for i in range(x):
-            data += "["
-            for j in range(y):
-                data += helper[i][j]
-                if (j < y-1):
-                    data += ","
-            data += "]"
-
-        #print(data)
-        return Matrix(data)
+        return Matrix("",x,y,helper)
 
     def exp(self,inverted = False):
-        E = 1.78107
-
         y = self.wiersze
         x = self.kolumny
 
@@ -200,25 +193,14 @@ class Matrix:
         if (inverted):
             for i in range(y):
                 for j in range(x):
-                    helper[i][j] = str(math.exp(-self.mat[i][j]))
+                    helper[i][j] = math.exp(-self.mat[i][j])
         else :
             for i in range(y):
                 for j in range(x):
-                    helper[i][j] = str(math.exp(self.mat[i][j]))
+                    helper[i][j] = math.exp(self.mat[i][j])
 
         #print(helper)
-
-        data = ""
-        for i in range(y):
-            data += "["
-            for j in range(x):
-                data += helper[i][j]
-                if (j < x-1):
-                    data += ","
-            data += "]"
-
-        #print(data)
-        return Matrix(data)
+        return Matrix("",y,x,helper)
     
     def sigmoid(self):
         y = self.wiersze
@@ -230,16 +212,7 @@ class Matrix:
             for j in range(x):
                 helper[i][j] = 1 / (1 + helper[i][j])
 
-        data = ""
-        for i in range(y):
-            data += "["
-            for j in range(x):
-                data += str(helper[i][j])
-                if (j < x-1):
-                    data += ","
-            data += "]"
-
-        return Matrix(data)
+        return Matrix("",y,x,helper)
 
     def sigmoid_derivative(self):
         y = self.wiersze
@@ -255,17 +228,7 @@ class Matrix:
                 z += 1
             helper.append(rowList)
 
-        data = ""
-        for i in range(y):
-            data += "["
-            for j in range(x):
-                data += str(helper[i][j])
-                if (j < x-1):
-                    data += ","
-            data += "]"
-
-
-        return Matrix(data)
+        return Matrix("",y,x,helper)
 
     #przeciążenia operatorów
     def __add__(self, o):
@@ -284,19 +247,10 @@ class Matrix:
                     z += 1
                 helper.append(rowList)
 
-            data = ""
-            for i in range(y):
-                data += "["
-                for j in range(x):
-                    data += str(helper[i][j])
-                    if (j < x-1):
-                        data += ","
-                data += "]"
+            return Matrix("",y,x,helper)
         except:
-            data = "[]"
             print("Błąd przy dodawaniu")
-
-        return Matrix(data)
+            return Matrix("[]")
 
     def __iadd__(self, o): # +=
         try:
@@ -322,34 +276,25 @@ class Matrix:
                     z += 1
                 helper.append(rowList)
 
-            data = ""
-            for i in range(y):
-                data += "["
-                for j in range(x):
-                    data += str(helper[i][j])
-                    if (j < x-1):
-                        data += ","
-                data += "]"
+            return Matrix("",y,x,helper)
         except:
-            data = "[]"
             print("Błąd przy odejmowaniu")
-
-        return Matrix(data)
+            return Matrix("[]")
 
     def __mul__(self, o): # * mnożenie macierzy
+        y1 = self.wiersze
+        x1 = self.kolumny
+        y2 = o.wiersze
+        x2 = o.kolumny
+
+        helper = []
+
+        z = 0   
         try:
-            y1 = self.wiersze
-            x1 = self.kolumny
-            y2 = o.wiersze
-            x2 = o.kolumny
-
-            helper = []
-
-            z = 0   
             for i in range(y1):
                 rowList = []
                 for j in range(x2):
-                    rowList.append(" ")
+                    rowList.append(0)
                     z += 1
                 helper.append(rowList)
 
@@ -371,29 +316,20 @@ class Matrix:
                 if (t == 0):
                     break
 
-            data = ""
-            for i in range(y1):
-                data += "["
-                for j in range(x2):
-                    data += str(helper[i][j])
-                    if (j < x2-1):
-                        data += ","
-                data += "]"
+            return Matrix("",y1,x2,helper)
 
         except:
-            data = "[]"
             print("Błąd przy mnożeniu macierzy")
-
-        return Matrix(data)
+            return Matrix("[]")
 
     def __pow__(self, o): # ** mnożenie self.x1 * o.x1 ...
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0   
         try:
-            y = self.wiersze
-            x = self.kolumny
-
-            helper = []
-
-            z = 0   
             for i in range(y):
                 rowList = []
                 for j in range(x):
@@ -401,16 +337,7 @@ class Matrix:
                     z += 1
                 helper.append(rowList)
 
-            data = ""
-            for i in range(y):
-                data += "["
-                for j in range(x):
-                    data += str(helper[i][j])
-                    if (j < x-1):
-                        data += ","
-                data += "]"
+            return Matrix("",y,x,helper)
         except:
-            data = "[]"
             print("Błąd przy mnożeniu elementów [/]")
-
-        return Matrix(data)
+            return Matrix("[]")
