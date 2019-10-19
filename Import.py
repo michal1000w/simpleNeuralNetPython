@@ -4,6 +4,7 @@ class Import:
     def __init__(self,path:str):
         self.Input = []
         self.Output = []
+        self.Labels = []
         self.filename = path
         self.data = ""
 
@@ -18,7 +19,25 @@ class Import:
             fragment = ""
             fragmenty = []
 
+            #getting labels
             i1 = 0
+            while (i1 < length):    
+                if (data[0] == '{'):
+                    fragment = ""
+                    while (i1 < length - 1):
+                        i1 += 1
+                        if (data[i1] == '}'):
+                            break
+                        fragment += data[i1]
+                    self.Labels.append(fragment)
+                if (len(self.Labels) != 0):
+                    break
+                i1 += 1
+            
+            #print(self.Labels)
+
+            #getting matrixes
+            fragmenty = []
             while (i1 < length):
                 if (data[i1] == '['):
                     fragment = ""
@@ -65,5 +84,29 @@ class Import:
             data += self.Output[i]
 
         data = Matrix.Matrix(data).T().getString()
+
+        return data
+
+    def get_labels(self):
+        length = len(self.Labels[0]) #długość stringa
+        labels = []
+
+        j1 = 0
+        while(j1 < length):
+            fragment = ""
+            while (self.Labels[0][j1] != ',' and j1 < length):
+                fragment += self.Labels[0][j1]
+                j1 += 1
+                if (j1 == length):
+                    break
+            if (fragment != ""):
+                labels.append(fragment)
+            j1 += 1
+
+        data = ""
+        for i in range(len(labels)):
+            data += "[" + labels[i] + "]"
+
+        print(data)
 
         return data
