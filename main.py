@@ -11,11 +11,35 @@ class NeuralNetwork:
 
         self.synaptic_weights = Matrix.Matrix("")
 
+        weights = ""
+        liczba = ""
+        for j in range(neuron_count):
+            weights += '['
+            for i in range(neuron_inputs):
+                liczba = str((random.random() * 2) - 1)
+                for z in range(len(liczba)):
+                    weights += liczba[z]
+                if (i == neuron_count):
+                    weights += ' '
+                else:
+                    weights += ','
+            weights += ']'
+
+        self.synaptic_weights.add(weights)
+        self.synaptic_weights = self.synaptic_weights.T()
+    
+    def print_synaptic_weights(self):
+        self.synaptic_weights.printMatrix()
+
+
 
 
 #main
 
-m = Matrix.Matrix("[1,6,5][2,4,3]")
+n = NeuralNetwork(3,2,1)
+n.print_synaptic_weights()
+
+'''m = Matrix.Matrix("[1,6,5][2,4,3]")
 #m.print()
 m.printMatrix()
 
@@ -26,10 +50,10 @@ m.printMatrix()
 #m.sigmoid().printMatrix()
 #m.sigmoid_derivative().printMatrix()
 
-'''c = Matrix("[2,3,6,7][4,5,8,9]")
+c = Matrix("[2,3,6,7][4,5,8,9]")
 (c-m).printMatrix()
 
 (m + m).printMatrix()
-(m - m).printMatrix()'''
+(m - m).printMatrix()
 (m*m).printMatrix()
-(m*m.T()).printMatrix()
+(m*m.T()).printMatrix()'''
