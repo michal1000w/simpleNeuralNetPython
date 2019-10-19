@@ -85,7 +85,7 @@ class NeuNet:
         nowa.add(data)
         if (self.sigm):
             nowa = nowa.sigmoid()
-        self.neural_net.think(nowa).printMatrix()
+        self.neural_net.think(nowa).printMatrix(0)
         self.neural_net.print_classified()
         print("")
 
@@ -94,45 +94,11 @@ class NeuNet:
 
 net = NeuNet()
 
-net.input("[1,2,3][2,3,4]")
-net.output("[1,0][0,1]")
+net.input("[1,2,3][1,2,3][2,3,4]")
+net.output("[1,1,0][0,0,1]")
 net.iterations(1000)
-net.labels("[ziemniak][kot]")
+net.labels("[japko][pomaranicz]")
 net.Setup()
 net.Train()
 
-net.Think("[1,3,5]")
-
-'''n = NeuralNetwork.NeuralNetwork(3,2,1)
-n.print_synaptic_weights()
-
-n.add_names("[piesek][kotek]")
-n.print_names()
-
-inputs = Matrix.Matrix("[1,2,3][1,2,3][2,3,4]")
-output = Matrix.Matrix("[1,1,0][0,0,1]").T()
-
-n.train(inputs,output,1000)
-m = Matrix.Matrix("[5,3,3]")
-n.think(m)
-n.print_classified()'''
-
-
-'''m = Matrix.Matrix("[1,6,5][2,4,3]")
-#m.print()
-m.printMatrix()
-
-#m.T().printMatrix()
-#m.exp().printMatrix()
-#m.exp(True).printMatrix()
-
-#m.sigmoid().printMatrix()
-#m.sigmoid_derivative().printMatrix()
-
-c = Matrix("[2,3,6,7][4,5,8,9]")
-(c-m).printMatrix()
-
-(m + m).printMatrix()
-(m - m).printMatrix()
-(m*m).printMatrix()
-(m*m.T()).printMatrix()'''
+net.Think("[1,13,4]")

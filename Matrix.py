@@ -66,18 +66,31 @@ class Matrix:
     def print(self):
         print(self.mat)
 
-    def printMatrix(self):
-        for i in range(self.wiersze):
-            for j in range(self.kolumny):
-                if (j == 0 and self.kolumny != 1):
-                    print("[",self.mat[i][j],",",end="",flush=True)
-                elif (j == 0):
-                    print("[",self.mat[i][j],"]",end="",flush=True)
-                elif (j == self.kolumny-1):
-                    print("",self.mat[i][j],"]",end="",flush=True)
-                else:
-                    print("",self.mat[i][j],",",end="",flush=True)
-            print("",flush=True)
+    def printMatrix(self,miejsca = -1):
+        if (miejsca < 0):   
+            for i in range(self.wiersze):
+                for j in range(self.kolumny):
+                    if (j == 0 and self.kolumny != 1):
+                        print("[",self.mat[i][j],",",end="",flush=True)
+                    elif (j == 0):
+                        print("[",self.mat[i][j],"]",end="",flush=True)
+                    elif (j == self.kolumny-1):
+                        print("",self.mat[i][j],"]",end="",flush=True)
+                    else:
+                        print("",self.mat[i][j],",",end="",flush=True)
+                print("",flush=True)
+        else:
+            for i in range(self.wiersze):
+                for j in range(self.kolumny):
+                    if (j == 0 and self.kolumny != 1):
+                        print("[",round(self.mat[i][j],miejsca),",",end="",flush=True)
+                    elif (j == 0):
+                        print("[",round(self.mat[i][j],miejsca),"]",end="",flush=True)
+                    elif (j == self.kolumny-1):
+                        print("",round(self.mat[i][j],miejsca),"]",end="",flush=True)
+                    else:
+                        print("",round(self.mat[i][j],miejsca),",",end="",flush=True)
+                print("",flush=True)
 
     def add(self,data):
         length = len(data)
