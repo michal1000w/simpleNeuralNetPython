@@ -142,10 +142,7 @@ class NeuralNetwork:
 
         lock.acquire()
         try:
-            #czemu to kurwa nie działa
             self.synaptic_batches[ID] = synaptic_weights
-            self.synaptic_batches.append(synaptic_weights)
-            self.synaptic_weights = self.synaptic_weights ** self.synaptic_weights
         finally:
             lock.release()
 
@@ -229,5 +226,11 @@ class NeuralNetwork:
         print("Training is done")
 
         #combine batches
-        for i in range(cpu_count):
-            self.synaptic_batches[0].printMatrix()
+        self.synaptic_weights = self.synaptic_batches[0]
+
+        '''for i in range(cores_used):
+            self.synaptic_batches[i].printMatrix()
+            print("")'''
+
+        for i in range(cores_used - 1):
+            self.synaptic_weights = self.synaptic_weights - self.synaptic_batches[i+1]
