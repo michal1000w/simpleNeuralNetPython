@@ -374,14 +374,14 @@ class Matrix:
 
         return Matrix(data)
 
-    def __imul_(self, o): # *= mnożenie self.x1 * o.x1 ...
-        y = self.wiersze
-        x = self.kolumny
+    def __pow__(self, o): # ** mnożenie self.x1 * o.x1 ...
+        try:
+            y = self.wiersze
+            x = self.kolumny
 
-        helper = []
+            helper = []
 
-        z = 0
-        try:    
+            z = 0   
             for i in range(y):
                 rowList = []
                 for j in range(x):
@@ -399,6 +399,6 @@ class Matrix:
                 data += "]"
         except:
             data = "[]"
-            print("Błąd przy mnożeniu elementów [*=]")
+            print("Błąd przy mnożeniu elementów [/]")
 
         return Matrix(data)

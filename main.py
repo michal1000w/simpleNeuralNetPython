@@ -62,6 +62,33 @@ class NeuralNetwork:
                     fragment += data[i]
                 self.nazwy.append(fragment)
 
+    #trenowanie sieci
+    def train(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
+        output = Matrix.Matrix("")
+        error = Matrix.Matrix("")
+        adjustment = Matrix.Matrix("")
+
+        modulo = 5 * (iterations / 100)
+
+        print(" [ ",end="")
+
+        for i in range(iterations):
+            if (i%modulo == 0):
+                print(str((i*100)/iterations)+"% ",end="",flush=True)
+            
+            output = self.think(training_inputs)
+            error = training_outputs - output
+
+            adjustment = training_inputs.T() * (output.sigmoid_derivative() ** error)
+
+            self.synaptic_weights += adjustment
+        
+        print(" 100% ]")
+
+    def think(self,inputs:Matrix.Matrix):
+        self.wynik = (inputs * self.synaptic_weights).sigmoid()
+        return self.wynik
+
 
 #main
 
@@ -70,6 +97,12 @@ n.print_synaptic_weights()
 
 n.add_names("[piesek][kotek]")
 n.print_names()
+
+inputs = Matrix.Matrix("[1,2,3][1,2,3][2,3,4]")
+output = Matrix.Matrix("[1,1,0][0,0,1]").T()
+
+n.train(inputs,output,1000)
+
 
 '''m = Matrix.Matrix("[1,6,5][2,4,3]")
 #m.print()
