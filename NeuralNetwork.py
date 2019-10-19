@@ -1,5 +1,5 @@
 import random
-import Matrix as Matrix
+import Matrix
 
 class NeuralNetwork:
     def __init__(self,neuron_inputs:int,neuron_count:int,seed:int):
