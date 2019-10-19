@@ -182,25 +182,25 @@ class NeuralNetwork:
         manager = Manager()
         self.synaptic_batches = manager.list()
         
-        for i in range(int(batch_size * cores_used)):
+        for i in range(cores_used):
             self.synaptic_batches.append(self.synaptic_weights)
 
 
         #create batches [input data]
         data_length = len(training_inputs.getArray()[0])
-        for i in range(int(batch_size * cores_used)):
+        for i in range(cores_used): #batch_size * 
             mat = []
             for j in range(batch_size): #wiersze
-                mat.append(training_inputs.getArray()[j])
+                mat.append(training_inputs.getArray()[i * batch_size + j])
             new_batch = Matrix.Matrix("",batch_size,data_length,mat)
             batches_in.append(new_batch)
 
         #create batches [output data]
         data_length = len(training_outputs.getArray()[0])
-        for i in range(int(batch_size * cores_used)):
+        for i in range(cores_used):
             mat = []
             for j in range(batch_size): #wiersze
-                mat.append(training_outputs.getArray()[j])
+                mat.append(training_outputs.getArray()[i * batch_size + j])
             new_batch = Matrix.Matrix("",batch_size,data_length,mat)
             batches_out.append(new_batch)
 
@@ -228,4 +228,6 @@ class NeuralNetwork:
         print("]\n")
         print("Training is done")
 
-        self.synaptic_batches[0].printMatrix()
+        #combine batches
+        for i in range(cpu_count):
+            self.synaptic_batches[0].printMatrix()
