@@ -1,7 +1,7 @@
 import random
 import Matrix
 
-from multiprocessing import Process, Manager, Lock
+from multiprocessing import Process, Manager, Lock, Array
 from multiprocessing.managers import BaseManager
 import os
 import time
@@ -16,6 +16,8 @@ class NeuralNetwork:
         self.synaptic_weights = Matrix.Matrix("")
         self.wynik = Matrix.Matrix("")
         self.nazwy = []
+
+        self.synaptic_batches = []
 
         weights = ""
         liczba = ""
@@ -138,6 +140,15 @@ class NeuralNetwork:
 
             synaptic_weights += adjustment
 
+        lock.acquire()
+        try:
+            #czemu to kurwa nie działa
+            self.synaptic_batches[ID] = synaptic_weights
+            self.synaptic_batches.append(synaptic_weights)
+            self.synaptic_weights = self.synaptic_weights ** self.synaptic_weights
+        finally:
+            lock.release()
+
     def train_server(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
         processes = []
         lock = Lock()
@@ -146,10 +157,13 @@ class NeuralNetwork:
         batches_in = []
         batches_out = []
         data_count = len(training_inputs.getArray())
-        if (data_count >= os.cpu_count()):
-            batch_size = int(data_count / os.cpu_count())
-            left_size = data_count - os.cpu_count()*batch_size
-            cores_used = os.cpu_count()
+        cpu_count = os.cpu_count()
+        #cpu_count = 1
+
+        if (data_count >= cpu_count):
+            batch_size = int(data_count / cpu_count)
+            left_size = data_count - cpu_count*batch_size
+            cores_used = cpu_count
         else:
             batch_size = 1
             left_size = 0
@@ -162,6 +176,15 @@ class NeuralNetwork:
         print("Left size: ",left_size)
         print("Threads used: ",cores_used)
         print("")
+
+        #create synaptic batches
+        #pamięć współdzielona
+        manager = Manager()
+        self.synaptic_batches = manager.list()
+        
+        for i in range(int(batch_size * cores_used)):
+            self.synaptic_batches.append(self.synaptic_weights)
+
 
         #create batches [input data]
         data_length = len(training_inputs.getArray()[0])
@@ -202,5 +225,7 @@ class NeuralNetwork:
             print(' %d ' % j,end="",flush=True)
             process.join()
             j += 1
-        print("]")
+        print("]\n")
         print("Training is done")
+
+        self.synaptic_batches[0].printMatrix()
