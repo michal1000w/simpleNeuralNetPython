@@ -4,11 +4,21 @@ class Matrix:
     #podstawowe funkcje
 
     def __init__(self,data:str,wiersze = 0,kolumny = 0,mat = []):
-
-        if (not(wiersze == 0 and kolumny == 0 and mat == [])):
+        self.mat = []
+        if (wiersze != 0 and kolumny != 0 and mat != None):
             self.wiersze = wiersze
             self.kolumny = kolumny
             self.mat = mat
+        elif (mat == None):
+            self.wiersze = wiersze
+            self.kolumny = kolumny
+            z = 0
+            for i in range(self.wiersze):
+                rowList = []
+                for j in range(self.kolumny):
+                    rowList.append(0)
+                    z += 1
+                self.mat.append(rowList)
         else:   
             self.mat = []
             self.wiersze = 0
@@ -154,6 +164,21 @@ class Matrix:
 
     def getArray(self):
         return self.mat
+    
+    def getString(self):
+        y = self.wiersze
+        x = self.kolumny
+
+        data = ""
+        for i in range(y):
+            data += "["
+            for j in range(x):
+                data += str(self.mat[i][j])
+                if (j < x-1):
+                    data += ","
+            data += "]"
+
+        return data
     #matma
     def T(self):
         y = self.wiersze
@@ -383,3 +408,20 @@ class Matrix:
         except:
             print("Błąd przy dzieleniu [/]")
             return Matrix("[]")
+    
+
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        import copy
+        z = 0
+        for i in range(y):
+            rowList = []
+            for j in range(x):
+                rowList.append(copy.copy(self.mat[i][j]))
+                z += 1
+            helper.append(rowList)
+        return Matrix("",y,x,helper)
+

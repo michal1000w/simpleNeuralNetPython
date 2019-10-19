@@ -4,6 +4,8 @@ import NeuNet
 
 #main
 if __name__ == '__main__':  
+    experimental = True
+
     net = NeuNet.NeuNet()
 
     #net.input("[1,2,3][1,2,3][2,3,4][4,4,5][6,6,7][5,3,2][3,2,1][1,1,-1] [1,2,3][1,2,3][2,3,4][4,4,5][6,6,7][5,3,2][3,2,1][1,1,-1]")
@@ -17,19 +19,20 @@ if __name__ == '__main__':
     net.labels("[japko][pomaranicz]")
 
     #experimental
-    #net.go_experimental(True)
-    net.set_threads(1)
+    #net.go_experimental(experimental)
+    net.set_threads(4)
 
     net.Setup()
 
-
-    '''net.Train()
-    net.Think("[1,13,4]")
-    net.Think("[5,3,2]")'''
-    try:
+    if (experimental):  
         net.Train()
-
         net.Think("[1,13,4]")
         net.Think("[5,3,2]")
-    except:
-        print("Training Failed")
+    else:   
+        try:
+            net.Train()
+
+            net.Think("[1,13,4]")
+            net.Think("[5,3,2]")
+        except:
+            print("Training Failed")
