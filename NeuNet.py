@@ -46,11 +46,18 @@ class NeuNet:
 
     def set_threads(self,threads):
         self.threads = threads
+    
+    def go_experimental(self,experimental:bool):
+        self.experimental = experimental
 
     def Setup(self):
         print(self.ID,"Starting Setup...")
         if (not(self.training_inputs.mat == [] or self.training_outputs.mat == [] or self.iteration == 0 or len(self.neural_net.nazwy) == 0)):
             print(self.ID,"Setting up NeuralNetwork")
+
+            if(self.experimental):
+                print(self.ID,"!!!!Experimental mode enable (may cause some bugs)!!!!")
+
             neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads)
             neur.add_names(self.names)
             self.neural_net = neur
