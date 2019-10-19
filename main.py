@@ -10,6 +10,8 @@ class NeuralNetwork:
         self.neuron_inputs = neuron_inputs
 
         self.synaptic_weights = Matrix.Matrix("")
+        self.wynik = Matrix.Matrix("")
+        self.nazwy = []
 
         weights = ""
         liczba = ""
@@ -31,6 +33,13 @@ class NeuralNetwork:
     def print_synaptic_weights(self):
         self.synaptic_weights.printMatrix()
 
+    def print_classified(self):
+        klasy = self.neuron_count
+
+        for i in range(klasy):
+            if (self.wynik.getArray()[0][i] >= 0.5):
+                print("[",self.nazwy[i],"]", end="")
+        print("")
 
 
 

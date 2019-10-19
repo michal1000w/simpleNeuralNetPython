@@ -134,7 +134,8 @@ class Matrix:
         wartosci.clear()
         fragmenty.clear()
 
-
+    def getArray(self):
+        return self.mat
     #matma
     def T(self):
         y = self.wiersze
