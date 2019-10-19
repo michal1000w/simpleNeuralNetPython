@@ -192,9 +192,10 @@ class NeuralNetwork:
         for i in range(cores_used):
             self.synaptic_batches.append(self.synaptic_weights)
 
-        #testowe
         self.average_weight = manager.list()
         self.average_weight.append(self.synaptic_weights)
+
+
 
 
         #create batches [input data]
@@ -214,6 +215,8 @@ class NeuralNetwork:
                 mat.append(training_outputs.getArray()[i * batch_size + j])
             new_batch = Matrix.Matrix("",batch_size,data_length,mat)
             batches_out.append(new_batch)
+
+
 
 
 
@@ -245,6 +248,8 @@ class NeuralNetwork:
         print(" 100% ]")
         self.synaptic_weights = self.average_weight[0]
 
+        print("Training is done")
+
         '''
         print("Registering processes: [",end="")
         for i in range(cores_used):
@@ -267,12 +272,4 @@ class NeuralNetwork:
             process.join()
             j += 1
         print("]\n")'''
-
-
-        print("Training is done")
-
-        #combine batches
-
-        '''error = self.error_batches[0]
-        for i in range(cores_used - 1):
-            error += self.error_batches[i+1]'''
+        
