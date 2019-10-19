@@ -261,6 +261,55 @@ class Matrix:
 
         return Matrix(data)
 
+    def __mul__(self, o):
+        try:
+            y1 = self.wiersze
+            x1 = self.kolumny
+            y2 = o.wiersze
+            x2 = o.kolumny
+
+            helper = []
+
+            z = 0   
+            for i in range(y1):
+                rowList = []
+                for j in range(x2):
+                    rowList.append(" ")
+                    z += 1
+                helper.append(rowList)
+
+            suma = 0.0
+            w = k = 0
+            t = o.kolumny * self.wiersze
+            t1 = t
+
+            while (t > 0):
+                suma = 0.0
+                for i in range(x1):
+                    suma += self.mat[w][i] * o.mat[i][k]
+                helper[w][k] = suma
+
+                k = (k + 1) % x2
+                t -= 1
+                if (t%x2 == 0 and t != t1 and w < (y1 - 1)):
+                    w += 1
+                if (t == 0):
+                    break
+
+            data = ""
+            for i in range(y1):
+                data += "["
+                for j in range(x2):
+                    data += str(helper[i][j])
+                    if (j < x2-1):
+                        data += ","
+                data += "]"
+
+        except:
+            data = "[]"
+            print("Błąd przy mnożeniu macierzy")
+
+        return Matrix(data)
 
 #main
 
@@ -275,9 +324,10 @@ m.printMatrix()
 #m.sigmoid().printMatrix()
 #m.sigmoid_derivative().printMatrix()
 
-c = Matrix("[2,3,6,7][4,5,8,9]")
-
+'''c = Matrix("[2,3,6,7][4,5,8,9]")
 (c-m).printMatrix()
 
 (m + m).printMatrix()
-(m - m).printMatrix()
+(m - m).printMatrix()'''
+(m*m).printMatrix()
+(m*m.T()).printMatrix()
