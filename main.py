@@ -102,6 +102,9 @@ inputs = Matrix.Matrix("[1,2,3][1,2,3][2,3,4]")
 output = Matrix.Matrix("[1,1,0][0,0,1]").T()
 
 n.train(inputs,output,1000)
+m = Matrix.Matrix("[5,3,3]")
+n.think(m)
+n.print_classified()
 
 
 '''m = Matrix.Matrix("[1,6,5][2,4,3]")
