@@ -67,7 +67,8 @@ class NeuNet:
             print(self.ID,"Iterations:",self.iteration)
             start_time = time.perf_counter()
 
-            self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
+            #self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
+            self.neural_net.train_server(self.training_inputs,self.training_outputs,self.iteration)
 
             durationTh = (time.perf_counter() - start_time)
             print(self.ID,"Succeeded in time: [",durationTh,"] s \n")
