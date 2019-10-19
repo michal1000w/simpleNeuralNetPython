@@ -7,17 +7,21 @@ import os
 import time
 
 class NeuralNetwork:
-    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int):
+    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int,threads:int):
         random.seed(seed)
         self.SEED = seed
         self.neuron_count = neuron_count
         self.neuron_inputs = neuron_inputs
+        self.threads = threads
 
         self.synaptic_weights = Matrix.Matrix("")
         self.wynik = Matrix.Matrix("")
         self.nazwy = []
 
+        #multithreaded
         self.synaptic_batches = []
+        self.error_batches = []
+        #self.average_weight = []
 
         weights = ""
         liczba = ""
@@ -121,7 +125,7 @@ class NeuralNetwork:
         return synaptic
 
 
-    def mtrain(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int,lock:Lock,ID:int):
+    def mtrain(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int,lock:Lock,ID:int,cores_used:int):
         output = Matrix.Matrix("")
         error = Matrix.Matrix("")
         adjustment = Matrix.Matrix("")
@@ -129,8 +133,8 @@ class NeuralNetwork:
         synaptic_weights = Matrix.Matrix("")
         synaptic_weights = self.synaptic_generator(ID,synaptic_weights,self.neuron_count,self.neuron_inputs)
 
-        #time.sleep(0.001*ID) #async
-
+        #time.sleep(0.005*ID) #async
+   
         for i in range(iterations):
             #algorytm start
             output = (training_inputs * synaptic_weights).sigmoid()
@@ -140,9 +144,16 @@ class NeuralNetwork:
 
             synaptic_weights += adjustment
 
+            '''lock.acquire()
+            try:
+                self.synaptic_weights[0] += adjustment
+            finally:
+                lock.release()'''
+
         lock.acquire()
         try:
             self.synaptic_batches[ID] = synaptic_weights
+            self.error_batches[ID] = adjustment
         finally:
             lock.release()
 
@@ -154,8 +165,10 @@ class NeuralNetwork:
         batches_in = []
         batches_out = []
         data_count = len(training_inputs.getArray())
-        cpu_count = os.cpu_count()
-        #cpu_count = 1
+        if (self.threads <= os.cpu_count() and self.threads > 0):
+            cpu_count = self.threads
+        else:
+            cpu_count = os.cpu_count()
 
         if (data_count >= cpu_count):
             batch_size = int(data_count / cpu_count)
@@ -178,9 +191,15 @@ class NeuralNetwork:
         #pamięć współdzielona
         manager = Manager()
         self.synaptic_batches = manager.list()
+        self.error_batches = manager.list()
         
         for i in range(cores_used):
             self.synaptic_batches.append(self.synaptic_weights)
+            self.error_batches.append(self.synaptic_weights)
+
+        #testowe
+        '''self.average_weight = manager.list()
+        self.average_weight.append(self.synaptic_weights)'''
 
 
         #create batches [input data]
@@ -205,7 +224,7 @@ class NeuralNetwork:
         print("Registering processes: [",end="")
         for i in range(cores_used):
             print(' %d ' % i,end="",flush=True)
-            processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],iterations,lock,i)))
+            processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],iterations,lock,i,cores_used)))
         print("]")
 
         print("Starting processes: [",end="")
@@ -226,11 +245,15 @@ class NeuralNetwork:
         print("Training is done")
 
         #combine batches
-        self.synaptic_weights = self.synaptic_batches[0]
+        '''t = self.synaptic_weights[0]
+        self.synaptic_weights = t'''
 
         '''for i in range(cores_used):
             self.synaptic_batches[i].printMatrix()
             print("")'''
-
+        error = self.error_batches[0]
         for i in range(cores_used - 1):
-            self.synaptic_weights = self.synaptic_weights - self.synaptic_batches[i+1]
+            error += self.error_batches[i+1]
+
+        for i in range(cores_used):
+            self.synaptic_weights = self.synaptic_weights + self.synaptic_batches[i]

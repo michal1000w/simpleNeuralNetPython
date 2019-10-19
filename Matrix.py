@@ -339,5 +339,47 @@ class Matrix:
 
             return Matrix("",y,x,helper)
         except:
-            print("Błąd przy mnożeniu elementów [/]")
+            print("Błąd przy mnożeniu elementów [**]")
+            return Matrix("[]")
+
+    def __mod__(self, o): #  %
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0
+
+        try:    
+            for i in range(y):
+                rowList = []
+                for j in range(x):
+                    rowList.append(self.mat[i][j] * o)
+                    z += 1
+                helper.append(rowList)
+
+            return Matrix("",y,x,helper)
+        except:
+            print("Błąd przy mnożeniu przez stałą [%]")
+            return Matrix("[]")
+
+    def __truediv__(self, o): #/
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0
+
+        try:    
+            for i in range(y):
+                rowList = []
+                for j in range(x):
+                    rowList.append(self.mat[i][j] / o)
+                    z += 1
+                helper.append(rowList)
+
+            return Matrix("",y,x,helper)
+        except:
+            print("Błąd przy dzieleniu [/]")
             return Matrix("[]")

@@ -3,8 +3,8 @@ import Matrix
 import NeuralNetwork
 
 class NeuNet:
-    def __init__(self,sigm = True):
-        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1)
+    def __init__(self,experimental=False,sigm = True):
+        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1,0)
         self.training_inputs = Matrix.Matrix("")
         self.training_outputs = Matrix.Matrix("")
 
@@ -13,6 +13,8 @@ class NeuNet:
         self.iteration = 0
         self.setup = False
         self.SEED = 1
+        self.threads = 0
+        self.experimental = experimental
 
         self.names = ""
 
@@ -42,11 +44,14 @@ class NeuNet:
     def seed(self,SEED):
         self.SEED = SEED
 
+    def set_threads(self,threads):
+        self.threads = threads
+
     def Setup(self):
         print(self.ID,"Starting Setup...")
         if (not(self.training_inputs.mat == [] or self.training_outputs.mat == [] or self.iteration == 0 or len(self.neural_net.nazwy) == 0)):
             print(self.ID,"Setting up NeuralNetwork")
-            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED)
+            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads)
             neur.add_names(self.names)
             self.neural_net = neur
 
@@ -67,8 +72,10 @@ class NeuNet:
             print(self.ID,"Iterations:",self.iteration)
             start_time = time.perf_counter()
 
-            #self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
-            self.neural_net.train_server(self.training_inputs,self.training_outputs,self.iteration)
+            if (self.experimental):
+                self.neural_net.train_server(self.training_inputs,self.training_outputs,self.iteration)
+            else:
+                self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
 
             durationTh = (time.perf_counter() - start_time)
             print(self.ID,"Succeeded in time: [",durationTh,"] s \n")
