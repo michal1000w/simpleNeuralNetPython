@@ -232,6 +232,15 @@ class Matrix:
 
         return Matrix(data)
 
+    def __iadd__(self, o): # +=
+        try:
+            for i in range(self.wiersze):
+                for j in range(self.kolumny):
+                    self.mat[i][j] += o.mat[i][j]
+        except:
+            print("Błąd przy dodawaniu [+=]")
+        return self
+
     def __sub__(self, o):
         y = self.wiersze
         x = self.kolumny
@@ -261,7 +270,7 @@ class Matrix:
 
         return Matrix(data)
 
-    def __mul__(self, o):
+    def __mul__(self, o): # * mnożenie macierzy
         try:
             y1 = self.wiersze
             x1 = self.kolumny
@@ -310,6 +319,36 @@ class Matrix:
             print("Błąd przy mnożeniu macierzy")
 
         return Matrix(data)
+
+    def __imul_(self, o): # *= mnożenie self.x1 * o.x1 ...
+        y = self.wiersze
+        x = self.kolumny
+
+        helper = []
+
+        z = 0
+        try:    
+            for i in range(y):
+                rowList = []
+                for j in range(x):
+                    rowList.append(self.mat[i][j] * o.mat[i][j])
+                    z += 1
+                helper.append(rowList)
+
+            data = ""
+            for i in range(y):
+                data += "["
+                for j in range(x):
+                    data += str(helper[i][j])
+                    if (j < x-1):
+                        data += ","
+                data += "]"
+        except:
+            data = "[]"
+            print("Błąd przy mnożeniu elementów [*=]")
+
+        return Matrix(data)
+
 
 #main
 
