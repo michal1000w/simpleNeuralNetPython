@@ -12,6 +12,7 @@ class NeuNet:
         self.sigm = sigm
         self.iteration = 0
         self.setup = False
+        self.SEED = 1
 
         self.names = ""
 
@@ -38,11 +39,14 @@ class NeuNet:
     def iterations(self,iter:int):
         self.iteration = abs(iter)
 
+    def seed(self,SEED):
+        self.SEED = SEED
+
     def Setup(self):
         print(self.ID,"Starting Setup...")
         if (not(self.training_inputs.mat == [] or self.training_outputs.mat == [] or self.iteration == 0 or len(self.neural_net.nazwy) == 0)):
             print(self.ID,"Setting up NeuralNetwork")
-            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,1)
+            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED)
             neur.add_names(self.names)
             self.neural_net = neur
 
