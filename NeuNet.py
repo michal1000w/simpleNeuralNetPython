@@ -4,7 +4,7 @@ import NeuralNetwork
 
 class NeuNet:
     def __init__(self,experimental=False,sigm = True):
-        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1,0)
+        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1,0,0)
         self.training_inputs = Matrix.Matrix("")
         self.training_outputs = Matrix.Matrix("")
 
@@ -15,6 +15,7 @@ class NeuNet:
         self.SEED = 1
         self.threads = 0
         self.experimental = experimental
+        self.force = False
 
         self.names = ""
 
@@ -47,6 +48,9 @@ class NeuNet:
     def set_threads(self,threads):
         self.threads = threads
     
+    def force_threads(self,force):
+        self.force = force
+    
     def go_experimental(self,experimental:bool):
         self.experimental = experimental
 
@@ -58,7 +62,7 @@ class NeuNet:
             if(self.experimental):
                 print(self.ID,"!!!!Experimental mode enable (may cause some bugs)!!!!")
 
-            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads)
+            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force)
             neur.add_names(self.names)
             self.neural_net = neur
 

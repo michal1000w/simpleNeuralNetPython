@@ -8,13 +8,14 @@ import os
 import time
 
 class NeuralNetwork:
-    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int,threads:int):
+    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int,threads:int,force:bool):
         random.seed(seed)
         self.SEED = seed
         self.neuron_count = neuron_count
         self.neuron_inputs = neuron_inputs
         self.threads = threads
         self.result_list = []
+        self.force = force
 
         self.synaptic_weights = Matrix.Matrix("")
         self.wynik = Matrix.Matrix("")
@@ -192,6 +193,8 @@ class NeuralNetwork:
             cpu_count = int(self.threads)
         else:
             cpu_count = int(os.cpu_count())
+        if (self.threads > 0 and self.force == True):
+            cpu_count = int(self.threads)
 
         if (data_count >= cpu_count):
             batch_size = int(data_count / cpu_count)
@@ -287,6 +290,7 @@ class NeuralNetwork:
         from msvcrt import getch, kbhit
 
         #new multithreaded Loop
+        print("Press any key to end training")
         print("[ ",end="")
         freeze_support()
         for j in range(int(iterations/100)):

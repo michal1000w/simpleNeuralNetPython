@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     net = NeuNet.NeuNet()
 
-    im = Import.Import("INPUT\data3.txt")
+    im = Import.Import("INPUT\data5.txt")
 
     net.input(im.get_input())
     net.output(im.get_output())
@@ -19,17 +19,10 @@ if __name__ == '__main__':
     net.iterations(10000)
     #net.seed(4) #optional
 
-    '''net.input("[1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4][1,2,3][1,2,3][2,3,4][4,4,4]")
-    net.output("[1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0][0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1,0,0,1,1]")
-    
-    net.input("[1,2,3][1,2,3][2,3,4][4,4,4]")
-    net.output("[1,1,0,0][0,0,1,1]")
-    
-    net.labels("[japko][pomaranicz]")'''
-
     #experimental
     net.go_experimental(experimental)
     net.set_threads(0)
+    #net.force_threads(True)  #to set up more threads than CPU cores
 
     net.Setup()
 
@@ -44,4 +37,4 @@ if __name__ == '__main__':
             net.Think("[1,13,4]")
             net.Think("[5,3,2]")
         except:
-            print("Training Failed")
+            print("Training Failed (Maybe too much input data -> try multithreaded workflow)")
