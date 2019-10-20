@@ -1,8 +1,9 @@
 import random
 import Matrix
 
-from multiprocessing import Process, Manager, Lock, Array
+from multiprocessing import Process, Manager, Lock, Array, Pool, freeze_support
 from multiprocessing.managers import BaseManager
+from itertools import product, repeat
 import os
 import time
 
@@ -13,6 +14,7 @@ class NeuralNetwork:
         self.neuron_count = neuron_count
         self.neuron_inputs = neuron_inputs
         self.threads = threads
+        self.result_list = []
 
         self.synaptic_weights = Matrix.Matrix("")
         self.wynik = Matrix.Matrix("")
@@ -150,9 +152,42 @@ class NeuralNetwork:
         lock.acquire()
         try:
             self.synaptic_batches[ID] = synaptic_weights
-            #self.error_batches[ID] = adjustment
+            print("CORE: ",ID)
         finally:
             lock.release()
+
+    def pool_args(self,function, *args):
+        return zip(repeat(function),zip(*args))
+    def universal_worker(self,input_pair):
+        function, args = input_pair
+        return function(*args)
+
+    def log_result(self,result):
+        self.result_list.append(result)
+    def mtrainpool(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int,ID:int):
+        output = Matrix.Matrix("")
+        error = Matrix.Matrix("")
+        adjustment = Matrix.Matrix("")
+
+        #synaptic_weights = Matrix.Matrix("")
+
+        synaptic_weights = self.average_weight[0]
+
+
+        #time.sleep(0.005*ID) #async
+   
+        for i in range(iterations):
+            #algorytm start
+            output = (training_inputs * synaptic_weights).sigmoid()
+            error = training_outputs - output
+
+            adjustment = training_inputs.T() * (output.sigmoid_derivative() ** error)
+
+            synaptic_weights += adjustment
+
+        self.synaptic_batches[ID] = synaptic_weights
+        return synaptic_weights
+
 
     def train_server(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
         processes = []
@@ -161,11 +196,11 @@ class NeuralNetwork:
         #dzielenie na batche
         batches_in = []
         batches_out = []
-        data_count = len(training_inputs.getArray())
+        data_count = int(len(training_inputs.getArray()))
         if (self.threads <= os.cpu_count() and self.threads > 0):
-            cpu_count = self.threads
+            cpu_count = int(self.threads)
         else:
-            cpu_count = os.cpu_count()
+            cpu_count = int(os.cpu_count())
 
         if (data_count >= cpu_count):
             batch_size = int(data_count / cpu_count)
@@ -217,11 +252,11 @@ class NeuralNetwork:
             batches_out.append(new_batch)'''
         
         #create batches [input data]
-        data_length = len(training_inputs.getArray()[0])
+        data_length = int(len(training_inputs.getArray()[0]))
         left = left_size
-        for i in range(cores_used): #batch_size * 
+        for i in range(int(cores_used)): #batch_size * 
             mat = []
-            dod = left_size - left
+            dod = int(left_size - left)
             for j in range(batch_size): #wiersze
                 mat.append(training_inputs.getArray()[i * batch_size + j + dod])
             if (left > 0):
@@ -233,11 +268,11 @@ class NeuralNetwork:
             batches_in.append(new_batch)
 
         #create batches [output data]
-        data_length = len(training_outputs.getArray()[0])
+        data_length = int(len(training_outputs.getArray()[0]))
         left = left_size
-        for i in range(cores_used):
+        for i in range(int(cores_used)):
             mat = []
-            dod = left_size - left
+            dod = int(left_size - left)
             for j in range(batch_size): #wiersze
                 mat.append(training_outputs.getArray()[i * batch_size + j + dod])
             if (left > 0):
@@ -251,14 +286,46 @@ class NeuralNetwork:
 
 
 
-
         #starting multithreaded server
+        os.environ["OPENBLAS_MAIN_FREE"] = "1" #disable BLAS multithreading
+
         Iter = 100
         string = Matrix.Matrix("",self.neuron_inputs,self.neuron_count,None).getString()
         modulo = 5 * ((iterations / 100)/100)
 
-        #Starting Loop
+        from msvcrt import getch, kbhit
+
+        #new multithreaded Loop
         print("[ ",end="")
+        freeze_support()
+        for j in range(int(iterations/100)):
+            #wypisanie postępu
+            if (j%modulo == 0):
+                print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
+            weights = Matrix.Matrix(string)
+            #for i in range(cores_used):
+
+            pool = Pool(cores_used)
+            self.result_list = []
+            for i in range(cores_used):
+                #result.append(pool.apply_async(self.mtrainpool,(batches_in,batches_out,Iter,i)))
+                pool.apply_async(self.mtrainpool, args = (batches_in[i],batches_out[i],Iter,i), callback = self.log_result)
+            pool.close()
+            pool.join()
+
+            if (kbhit()): #przerwanie
+                print(" [przerwanie] ", end="", flush=True)
+                break
+
+            #combine batches
+            for i in range(cores_used):
+                weights += self.synaptic_batches[i]
+            weights = weights/cores_used
+            self.average_weight[0] = weights
+
+
+        #Starting Loop OLD
+        '''print("[ ",end="")
         for j in range(int(iterations/100)):
             #wypisanie postępu
             if (j%modulo == 0):
@@ -271,13 +338,20 @@ class NeuralNetwork:
                 processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],Iter,lock,i,cores_used)))
             for process in processes:
                 process.start()
+
+            if (kbhit()): #przerwanie
+                print(" [przerwanie] ", end="", flush=True)
+                for process in processes:
+                    process.join()
+                break
+
             for process in processes:
                 process.join()
             #combine batches
             for i in range(cores_used):
                 weights += self.synaptic_batches[i]
             weights = weights/cores_used
-            self.average_weight[0] = weights
+            self.average_weight[0] = weights'''
 
         print(" 100% ]")
         self.synaptic_weights = self.average_weight[0]

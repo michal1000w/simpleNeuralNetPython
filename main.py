@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     net = NeuNet.NeuNet()
 
-    im = Import.Import("INPUT\data4.txt")
+    im = Import.Import("INPUT\data3.txt")
 
     net.input(im.get_input())
     net.output(im.get_output())
