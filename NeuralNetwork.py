@@ -186,182 +186,186 @@ class NeuralNetwork:
         if (self.threads > 0 and self.force == True):
             cpu_count = int(self.threads)
 
-        if (data_count >= cpu_count):
-            batch_size = int(data_count / cpu_count)
-            left_size = data_count - cpu_count*batch_size
-            cores_used = cpu_count
+        #przechodzenie na tryb jednordzeniowy jeżeli mało danych
+        if (cpu_count == 1):
+            self.train(training_inputs,training_outputs,iterations)
         else:
-            batch_size = 1
-            left_size = 0
-            cores_used = data_count
+            if (data_count >= cpu_count):
+                batch_size = int(data_count / cpu_count)
+                left_size = data_count - cpu_count*batch_size
+                cores_used = cpu_count
+            else:
+                batch_size = 1
+                left_size = 0
+                cores_used = data_count
 
-        print("\n[Creating Batches]")
-        print("CPU Threads: ",os.cpu_count())
-        print("Data count: ",data_count)
-        print("Batch size: ",batch_size)
-        print("Left size: ",left_size)
-        print("Threads used: ",cores_used)
-        print("")
+            print("\n[Creating Batches]")
+            print("CPU Threads: ",os.cpu_count())
+            print("Data count: ",data_count)
+            print("Batch size: ",batch_size)
+            print("Left size: ",left_size)
+            print("Threads used: ",cores_used)
+            print("")
 
-        #create synaptic batches
-        #pamięć współdzielona
-        manager = Manager()
-        self.synaptic_batches = manager.list()
-        
-        for i in range(cores_used):
-            self.synaptic_batches.append(self.synaptic_weights)
-
-        self.average_weight = manager.list()
-        self.average_weight.append(self.synaptic_weights)
-
-
-
-
-        
-        ''' #Create batches old
-        data_length = len(training_inputs.getArray()[0])
-        for i in range(cores_used): #batch_size * 
-            mat = []
-            for j in range(batch_size): #wiersze
-                mat.append(training_inputs.getArray()[i * batch_size + j])
-            new_batch = Matrix.Matrix("",batch_size,data_length,mat)
-            batches_in.append(new_batch)
+            #create synaptic batches
+            #pamięć współdzielona
+            manager = Manager()
+            self.synaptic_batches = manager.list()
             
-        data_length = len(training_outputs.getArray()[0])
-        for i in range(cores_used): #batch_size * 
-            mat = []
-            for j in range(batch_size): #wiersze
-                mat.append(training_outputs.getArray()[i * batch_size + j])
-            new_batch = Matrix.Matrix("",batch_size,data_length,mat)
-            batches_out.append(new_batch)'''
-        
-        #create batches [input data]
-        data_length = int(len(training_inputs.getArray()[0]))
-        left = left_size
-        for i in range(int(cores_used)): #batch_size * 
-            mat = []
-            dod = int(left_size - left)
-            for j in range(batch_size): #wiersze
-                mat.append(training_inputs.getArray()[i * batch_size + j + dod])
-            if (left > 0):
-                mat.append(training_inputs.getArray()[i * batch_size + batch_size + dod])
-                left = left - 1
-                new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
-            else:
+            for i in range(cores_used):
+                self.synaptic_batches.append(self.synaptic_weights)
+
+            self.average_weight = manager.list()
+            self.average_weight.append(self.synaptic_weights)
+
+
+
+
+            
+            ''' #Create batches old
+            data_length = len(training_inputs.getArray()[0])
+            for i in range(cores_used): #batch_size * 
+                mat = []
+                for j in range(batch_size): #wiersze
+                    mat.append(training_inputs.getArray()[i * batch_size + j])
                 new_batch = Matrix.Matrix("",batch_size,data_length,mat)
-            batches_in.append(new_batch)
-
-        #create batches [output data]
-        data_length = int(len(training_outputs.getArray()[0]))
-        left = left_size
-        for i in range(int(cores_used)):
-            mat = []
-            dod = int(left_size - left)
-            for j in range(batch_size): #wiersze
-                mat.append(training_outputs.getArray()[i * batch_size + j + dod])
-            if (left > 0):
-                mat.append(training_outputs.getArray()[i * batch_size + batch_size + dod])
-                left = left - 1
-                new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
-            else:
+                batches_in.append(new_batch)
+                
+            data_length = len(training_outputs.getArray()[0])
+            for i in range(cores_used): #batch_size * 
+                mat = []
+                for j in range(batch_size): #wiersze
+                    mat.append(training_outputs.getArray()[i * batch_size + j])
                 new_batch = Matrix.Matrix("",batch_size,data_length,mat)
-            batches_out.append(new_batch)
+                batches_out.append(new_batch)'''
+            
+            #create batches [input data]
+            data_length = int(len(training_inputs.getArray()[0]))
+            left = left_size
+            for i in range(int(cores_used)): #batch_size * 
+                mat = []
+                dod = int(left_size - left)
+                for j in range(batch_size): #wiersze
+                    mat.append(training_inputs.getArray()[i * batch_size + j + dod])
+                if (left > 0):
+                    mat.append(training_inputs.getArray()[i * batch_size + batch_size + dod])
+                    left = left - 1
+                    new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
+                else:
+                    new_batch = Matrix.Matrix("",batch_size,data_length,mat)
+                batches_in.append(new_batch)
+
+            #create batches [output data]
+            data_length = int(len(training_outputs.getArray()[0]))
+            left = left_size
+            for i in range(int(cores_used)):
+                mat = []
+                dod = int(left_size - left)
+                for j in range(batch_size): #wiersze
+                    mat.append(training_outputs.getArray()[i * batch_size + j + dod])
+                if (left > 0):
+                    mat.append(training_outputs.getArray()[i * batch_size + batch_size + dod])
+                    left = left - 1
+                    new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
+                else:
+                    new_batch = Matrix.Matrix("",batch_size,data_length,mat)
+                batches_out.append(new_batch)
 
 
 
 
-        #starting multithreaded server
-        #os.environ["OPENBLAS_MAIN_FREE"] = "1" #disable BLAS multithreading
+            #starting multithreaded server
+            #os.environ["OPENBLAS_MAIN_FREE"] = "1" #disable BLAS multithreading
 
-        Iter = 100
-        string = Matrix.Matrix("",self.neuron_inputs,self.neuron_count,None).getString()
-        modulo = 5 * ((iterations / 100)/100)
+            Iter = 100
+            string = Matrix.Matrix("",self.neuron_inputs,self.neuron_count,None).getString()
+            modulo = 5 * ((iterations / 100)/100)
 
-        from msvcrt import getch, kbhit
+            from msvcrt import getch, kbhit
 
-        #new multithreaded Loop
-        print("Press any key to end training")
-        print("[ ",end="")
-        freeze_support()
-        for j in range(int(iterations/100)):
-            #wypisanie postępu
-            if (j%modulo == 0):
-                print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
-            weights = Matrix.Matrix(string)
+            #new multithreaded Loop
+            print("Press any key to end training")
+            print("[ ",end="")
+            freeze_support()
+            for j in range(int(iterations/100)):
+                #wypisanie postępu
+                if (j%modulo == 0):
+                    print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
+                weights = Matrix.Matrix(string)
 
-            pool = Pool(cores_used)
-            self.result_list = []
-            for i in range(cores_used):
-                #result.append(pool.apply_async(self.mtrainpool,(batches_in,batches_out,Iter,i)))
-                pool.apply_async(self.mtrainpool, args = (batches_in[i],batches_out[i],Iter,i), callback = self.log_result)
-            pool.close()
-            pool.join()
+                pool = Pool(cores_used)
+                self.result_list = []
+                for i in range(cores_used):
+                    #result.append(pool.apply_async(self.mtrainpool,(batches_in,batches_out,Iter,i)))
+                    pool.apply_async(self.mtrainpool, args = (batches_in[i],batches_out[i],Iter,i), callback = self.log_result)
+                pool.close()
+                pool.join()
 
-            if (kbhit()): #przerwanie
-                print(" [przerwanie] ", end="", flush=True)
-                break
+                if (kbhit()): #przerwanie
+                    print(" [przerwanie] ", end="", flush=True)
+                    break
 
-            #combine batches
-            for i in range(cores_used):
-                weights += self.synaptic_batches[i]
-            weights = weights/cores_used
-            self.average_weight[0] = weights
+                #combine batches
+                for i in range(cores_used):
+                    weights += self.synaptic_batches[i]
+                weights = weights/cores_used
+                self.average_weight[0] = weights
 
 
-        #Starting Loop OLD
-        '''print("[ ",end="")
-        for j in range(int(iterations/100)):
-            #wypisanie postępu
-            if (j%modulo == 0):
-                print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
+            #Starting Loop OLD
+            '''print("[ ",end="")
+            for j in range(int(iterations/100)):
+                #wypisanie postępu
+                if (j%modulo == 0):
+                    print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
 
-            weights = Matrix.Matrix(string)
-            processes = []
+                weights = Matrix.Matrix(string)
+                processes = []
 
-            for i in range(cores_used):
-                processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],Iter,lock,i,cores_used)))
-            for process in processes:
-                process.start()
+                for i in range(cores_used):
+                    processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],Iter,lock,i,cores_used)))
+                for process in processes:
+                    process.start()
 
-            if (kbhit()): #przerwanie
-                print(" [przerwanie] ", end="", flush=True)
+                if (kbhit()): #przerwanie
+                    print(" [przerwanie] ", end="", flush=True)
+                    for process in processes:
+                        process.join()
+                    break
+
                 for process in processes:
                     process.join()
-                break
+                #combine batches
+                for i in range(cores_used):
+                    weights += self.synaptic_batches[i]
+                weights = weights/cores_used
+                self.average_weight[0] = weights'''
 
-            for process in processes:
-                process.join()
-            #combine batches
+            print(" 100% ]")
+            self.synaptic_weights = self.average_weight[0]
+
+            print("Training is done")
+
+            '''
+            print("Registering processes: [",end="")
             for i in range(cores_used):
-                weights += self.synaptic_batches[i]
-            weights = weights/cores_used
-            self.average_weight[0] = weights'''
+                print(' %d ' % i,end="",flush=True)
+                processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],Iter,lock,i,cores_used)))
+            print("]")
 
-        print(" 100% ]")
-        self.synaptic_weights = self.average_weight[0]
+            print("Starting processes: [",end="")
+            j = 0
+            for process in processes:
+                print(' %d ' % j,end="",flush=True)
+                process.start()
+                j += 1
+            print("]")
 
-        print("Training is done")
-
-        '''
-        print("Registering processes: [",end="")
-        for i in range(cores_used):
-            print(' %d ' % i,end="",flush=True)
-            processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],Iter,lock,i,cores_used)))
-        print("]")
-
-        print("Starting processes: [",end="")
-        j = 0
-        for process in processes:
-            print(' %d ' % j,end="",flush=True)
-            process.start()
-            j += 1
-        print("]")
-
-        print("Finishing processes: [",end="")
-        j = 0
-        for process in processes:
-            print(' %d ' % j,end="",flush=True)
-            process.join()
-            j += 1
-        print("]\n")'''
-        
+            print("Finishing processes: [",end="")
+            j = 0
+            for process in processes:
+                print(' %d ' % j,end="",flush=True)
+                process.join()
+                j += 1
+            print("]\n")'''
+            
