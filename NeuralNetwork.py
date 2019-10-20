@@ -156,11 +156,6 @@ class NeuralNetwork:
         finally:
             lock.release()
 
-    def pool_args(self,function, *args):
-        return zip(repeat(function),zip(*args))
-    def universal_worker(self,input_pair):
-        function, args = input_pair
-        return function(*args)
 
     def log_result(self,result):
         self.result_list.append(result)
@@ -169,12 +164,8 @@ class NeuralNetwork:
         error = Matrix.Matrix("")
         adjustment = Matrix.Matrix("")
 
-        #synaptic_weights = Matrix.Matrix("")
-
         synaptic_weights = self.average_weight[0]
 
-
-        #time.sleep(0.005*ID) #async
    
         for i in range(iterations):
             #algorytm start
@@ -186,7 +177,7 @@ class NeuralNetwork:
             synaptic_weights += adjustment
 
         self.synaptic_batches[ID] = synaptic_weights
-        return synaptic_weights
+        return 1
 
 
     def train_server(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
@@ -287,7 +278,7 @@ class NeuralNetwork:
 
 
         #starting multithreaded server
-        os.environ["OPENBLAS_MAIN_FREE"] = "1" #disable BLAS multithreading
+        #os.environ["OPENBLAS_MAIN_FREE"] = "1" #disable BLAS multithreading
 
         Iter = 100
         string = Matrix.Matrix("",self.neuron_inputs,self.neuron_count,None).getString()
@@ -303,7 +294,6 @@ class NeuralNetwork:
             if (j%modulo == 0):
                 print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
             weights = Matrix.Matrix(string)
-            #for i in range(cores_used):
 
             pool = Pool(cores_used)
             self.result_list = []
