@@ -103,29 +103,6 @@ class NeuralNetwork:
         return self.wynik
 
     #multithreading
-    def synaptic_generator(self,ID,synaptic:Matrix.Matrix,neuron_count,neuron_inputs):
-        random.seed(self.SEED + ID)
-
-        weights = ""
-        liczba = ""
-        for j in range(neuron_count):
-            weights += '['
-            for i in range(neuron_inputs):
-                liczba = str((random.random() * 2) - 1)
-                for z in range(len(liczba)):
-                    weights += liczba[z]
-                if (i == neuron_count):
-                    weights += ' '
-                else:
-                    weights += ','
-            weights += ']'
-
-        synaptic.add(weights)
-        synaptic = synaptic.T()
-
-        random.seed(self.SEED)
-        return synaptic
-
 
     def mtrain(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int,lock:Lock,ID:int,cores_used:int):
         output = Matrix.Matrix("")
@@ -180,6 +157,19 @@ class NeuralNetwork:
         self.synaptic_batches[ID] = synaptic_weights
         return 1
 
+    def automatic_thread_count(self,data_count:int):
+        cpu_cores = int(os.cpu_count())
+        output = 0
+        mnoznik = 90
+
+        for i in range(data_count):
+            if (i % int(mnoznik) == 0):
+                output += 1
+
+        if (output > cpu_cores):
+            output = cpu_cores
+
+        return output
 
     def train_server(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
         processes = []
@@ -192,7 +182,7 @@ class NeuralNetwork:
         if (self.threads <= os.cpu_count() and self.threads > 0):
             cpu_count = int(self.threads)
         else:
-            cpu_count = int(os.cpu_count())
+            cpu_count = self.automatic_thread_count(data_count)
         if (self.threads > 0 and self.force == True):
             cpu_count = int(self.threads)
 
