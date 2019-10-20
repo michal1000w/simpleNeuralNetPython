@@ -199,21 +199,42 @@ class NeuralNetwork:
 
 
         #create batches [input data]
-        data_length = len(training_inputs.getArray()[0])
+        '''data_length = len(training_inputs.getArray()[0])
         for i in range(cores_used): #batch_size * 
             mat = []
             for j in range(batch_size): #wiersze
                 mat.append(training_inputs.getArray()[i * batch_size + j])
             new_batch = Matrix.Matrix("",batch_size,data_length,mat)
+            batches_in.append(new_batch)'''
+        data_length = len(training_inputs.getArray()[0])
+        left = left_size
+        for i in range(cores_used): #batch_size * 
+            mat = []
+            dod = left_size - left
+            for j in range(batch_size): #wiersze
+                mat.append(training_inputs.getArray()[i * batch_size + j + dod])
+            if (left > 0):
+                mat.append(training_inputs.getArray()[i * batch_size + batch_size + dod])
+                left = left - 1
+                new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
+            else:
+                new_batch = Matrix.Matrix("",batch_size,data_length,mat)
             batches_in.append(new_batch)
 
         #create batches [output data]
         data_length = len(training_outputs.getArray()[0])
+        left = left_size
         for i in range(cores_used):
             mat = []
+            dod = left_size - left
             for j in range(batch_size): #wiersze
-                mat.append(training_outputs.getArray()[i * batch_size + j])
-            new_batch = Matrix.Matrix("",batch_size,data_length,mat)
+                mat.append(training_outputs.getArray()[i * batch_size + j + dod])
+            if (left > 0):
+                mat.append(training_outputs.getArray()[i * batch_size + batch_size + dod])
+                left = left - 1
+                new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
+            else:
+                new_batch = Matrix.Matrix("",batch_size,data_length,mat)
             batches_out.append(new_batch)
 
 

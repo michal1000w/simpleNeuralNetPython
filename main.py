@@ -6,7 +6,7 @@ import Import
 
 #main
 if __name__ == '__main__':  
-    experimental = False
+    experimental = True
 
     net = NeuNet.NeuNet()
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(16)
+    net.set_threads(2)
 
     net.Setup()
 
