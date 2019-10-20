@@ -107,6 +107,6 @@ class Import:
         for i in range(len(labels)):
             data += "[" + labels[i] + "]"
 
-        print(data)
+        #print(data)
 
         return data

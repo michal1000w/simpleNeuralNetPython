@@ -198,14 +198,25 @@ class NeuralNetwork:
 
 
 
-        #create batches [input data]
-        '''data_length = len(training_inputs.getArray()[0])
+        
+        ''' #Create batches old
+        data_length = len(training_inputs.getArray()[0])
         for i in range(cores_used): #batch_size * 
             mat = []
             for j in range(batch_size): #wiersze
                 mat.append(training_inputs.getArray()[i * batch_size + j])
             new_batch = Matrix.Matrix("",batch_size,data_length,mat)
-            batches_in.append(new_batch)'''
+            batches_in.append(new_batch)
+            
+        data_length = len(training_outputs.getArray()[0])
+        for i in range(cores_used): #batch_size * 
+            mat = []
+            for j in range(batch_size): #wiersze
+                mat.append(training_outputs.getArray()[i * batch_size + j])
+            new_batch = Matrix.Matrix("",batch_size,data_length,mat)
+            batches_out.append(new_batch)'''
+        
+        #create batches [input data]
         data_length = len(training_inputs.getArray()[0])
         left = left_size
         for i in range(cores_used): #batch_size * 
@@ -246,14 +257,16 @@ class NeuralNetwork:
         string = Matrix.Matrix("",self.neuron_inputs,self.neuron_count,None).getString()
         modulo = 5 * ((iterations / 100)/100)
 
+        #Starting Loop
         print("[ ",end="")
         for j in range(int(iterations/100)):
             #wypisanie postępu
             if (j%modulo == 0):
                 print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
 
-            processes = []
             weights = Matrix.Matrix(string)
+            processes = []
+
             for i in range(cores_used):
                 processes.append(Process(target=self.mtrain, args=(batches_in[i],batches_out[i],Iter,lock,i,cores_used)))
             for process in processes:

@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     net = NeuNet.NeuNet()
 
-    im = Import.Import("INPUT\data1.txt")
+    im = Import.Import("INPUT\data4.txt")
 
     net.input(im.get_input())
     net.output(im.get_output())
@@ -29,7 +29,7 @@ if __name__ == '__main__':
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(2)
+    net.set_threads(0)
 
     net.Setup()
 
