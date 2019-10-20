@@ -1,5 +1,6 @@
 import random
 import Matrix
+from Import import Export
 
 from multiprocessing import Process, Manager, Lock, Array, Pool, freeze_support
 from multiprocessing.managers import BaseManager
@@ -20,6 +21,7 @@ class NeuralNetwork:
         self.synaptic_weights = Matrix.Matrix("")
         self.wynik = Matrix.Matrix("")
         self.nazwy = []
+        self.name = ""
 
         #multithreaded
         self.synaptic_batches = []
@@ -47,6 +49,10 @@ class NeuralNetwork:
     
     def print_synaptic_weights(self):
         self.synaptic_weights.printMatrix()
+
+    def set_name(self,name:str):
+        self.name = name
+        print("[NeuNet]  Name set:",name)
 
     def print_classified(self):
         klasy = self.neuron_count
@@ -349,6 +355,9 @@ class NeuralNetwork:
             self.synaptic_weights = self.average_weight[0]
 
             print("Training is done")
+
+            ex = Export(self.name)
+            ex.save_weights(self.synaptic_weights)
 
             '''
             print("Registering processes: [",end="")

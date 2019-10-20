@@ -110,3 +110,60 @@ class Import:
         #print(data)
 
         return data
+
+class NetImport:
+    def __init__(self,path:str):
+        self.Weights = []
+        self.filename = path
+        self.data = ""
+
+        try:
+            #odczyt z pliku
+            file = open(path,"r")
+            data = file.read()
+            file.close()
+
+            #opracowanie danych
+            length = len(data)
+            fragment = ""
+
+            i1 = 0
+            while (i1 < length):
+                if (data[i1] == '['):
+                    fragment = ""
+                    while (i1 < length - 1):
+                        i1 += 1
+                        if (data[i1] == ']'):
+                            break
+                        fragment += data[i1]
+                    self.Weights.append(fragment)
+                i1 += 1
+        except:
+            print("Can't open the file:",path)
+
+    def get_weights(self):
+        length = len(self.Weights)
+
+        data = ""
+        for i in range(length):
+            data += "[" + self.Weights[i] + "]"
+        
+        output = Matrix.Matrix(data)
+        return output
+
+class Export:
+    def __init__(self,filename:str):
+        self.file_name = filename
+        self.path = "OUTPUT\Saved_Networks\\" + filename + ".txt"
+
+    def save_weights(self,weights:Matrix.Matrix):
+        print("Saving weights...")
+        print("Path: ",self.path)
+
+        try:
+            f = open(self.path,"w+")
+            f.write(weights.getString())
+            f.close()
+            print("Saved")
+        except:
+            print("Writing failed")

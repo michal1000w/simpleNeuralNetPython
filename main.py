@@ -25,13 +25,13 @@ if __name__ == '__main__':
     #net.force_threads(True)  #to set up more threads than CPU cores
 
     net.Setup()
+    net.set_name("my_network_2")
 
     #load network from file
-    net.load_synaptic_weights(Matrix.Matrix("[1,2][-10,35][22,56]"))
-    net.print_synaptic_weights()
+    '''nim = Import.NetImport("OUTPUT\Saved_Networks\my_network_1.txt")
+    net.load_synaptic_weights(nim.get_weights())
+    net.print_synaptic_weights()'''
 
-    import os
-    os.system("pause")
 
     if (experimental):  
         net.Train()

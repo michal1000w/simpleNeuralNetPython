@@ -50,6 +50,9 @@ class NeuNet:
         print("Synaptic weights:")
         self.neural_net.print_synaptic_weights()
 
+    def set_name(self,name:str):
+        self.neural_net.set_name(name)
+
     def iterations(self,iter:int):
         self.iteration = abs(iter)
 
