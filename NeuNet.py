@@ -17,6 +17,8 @@ class NeuNet:
         self.experimental = experimental
         self.force = False
 
+        self.weights = Matrix.Matrix("")
+
         self.names = ""
 
         print(self.ID,"Created instance")
@@ -38,6 +40,15 @@ class NeuNet:
         print(self.ID,"Adding labels")
         self.neural_net.add_names(names)
         self.names = names
+
+    def load_synaptic_weights(self,weights:Matrix.Matrix):
+        print("Loading synaptic weights...")
+        self.weights = weights
+        self.neural_net.load_synaptic_weights(weights)
+
+    def print_synaptic_weights(self):
+        print("Synaptic weights:")
+        self.neural_net.print_synaptic_weights()
 
     def iterations(self,iter:int):
         self.iteration = abs(iter)

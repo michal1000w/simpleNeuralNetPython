@@ -41,6 +41,9 @@ class NeuralNetwork:
 
         self.synaptic_weights.add(weights)
         self.synaptic_weights = self.synaptic_weights.T()
+
+    def load_synaptic_weights(self,weights:Matrix.Matrix):
+        self.synaptic_weights = weights
     
     def print_synaptic_weights(self):
         self.synaptic_weights.printMatrix()
@@ -82,6 +85,7 @@ class NeuralNetwork:
 
         modulo = 5 * (iterations / 100)
 
+        print("[Single Threaded training]")
         print(" [ ",end="")
 
         for i in range(iterations):

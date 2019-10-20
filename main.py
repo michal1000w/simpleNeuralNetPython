@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     net = NeuNet.NeuNet()
 
-    im = Import.Import("INPUT\data1.txt")
+    im = Import.Import("INPUT\Training_Data\data3.txt")
 
     net.input(im.get_input())
     net.output(im.get_output())
@@ -25,6 +25,13 @@ if __name__ == '__main__':
     #net.force_threads(True)  #to set up more threads than CPU cores
 
     net.Setup()
+
+    #load network from file
+    net.load_synaptic_weights(Matrix.Matrix("[1,2][-10,35][22,56]"))
+    net.print_synaptic_weights()
+
+    import os
+    os.system("pause")
 
     if (experimental):  
         net.Train()
