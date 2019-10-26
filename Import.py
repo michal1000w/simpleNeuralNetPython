@@ -7,6 +7,7 @@ class Import:
         self.Labels = []
         self.filename = path
         self.data = ""
+        self.labels_matrix = []
 
         try:
             #odczyt z pliku
@@ -123,6 +124,7 @@ class Import:
                     break
             if (fragment != ""):
                 labels.append(fragment)
+                self.labels_matrix.append(fragment)
             j1 += 1
 
         data = ""
@@ -132,6 +134,10 @@ class Import:
         #print(data)
 
         return data
+
+    def get_labels_matrix(self):
+        self.get_labels()
+        return self.labels_matrix
 
 class NetImport:
     def __init__(self,path:str):
@@ -196,7 +202,7 @@ class Think_File:
         self.path = "OUTPUT\Labeled_Data\\" + filename + ".txt"
         self.info_path = "OUTPUT\Labeled_Data\\" + filename + "-info.txt"
 
-    def save_think_output(self,inp:[],out:[],predicted:[]):
+    def save_think_output(self,inp:[],out:[],predicted:[],labels:str,labels_matrix:[]):
         print("Saving Think Output...")
         print("Path: ",self.path)
 
@@ -214,13 +220,60 @@ class Think_File:
             print("Writing failed " + e)
 
         
-        '''print("Saving Test Info...")
-        print("Path: ", self.filename)
+        #preparing confusion matrix
+        confusion_matrix = []
+        confusion_size = len(predicted[0].getArray()[0])
+        
+        for i in range(confusion_size):
+            mat = []
+            for j in range(confusion_size):
+                mat.append(0)
+            confusion_matrix.append(mat)
+
+        
+        for z in range(len(predicted)): 
+            out1 = out[z].T()
+            for i in range(confusion_size):
+                for j in range(confusion_size):
+                    if ((out1.getArray()[i][0] == predicted_simple[z].getArray()[0][j]) and (out1.getArray()[i][0] == 1)):
+                        confusion_matrix[i][j] += 1
+
+        for i in range(confusion_size):
+                for j in range(confusion_size):
+                    confusion_matrix[i][j] = int(confusion_matrix[i][j])
+
+        #rysowanie
+        print("\n\nConfusion Matrix:\n")
+        for i in range(int(len(labels)/confusion_size)):
+            print(" ",end="")
+        print(labels)
+
+        for i in range(confusion_size):
+            print("[" + str(labels_matrix[i]) + "]",end="")
+            print(confusion_matrix[i])
+
+        print("\n\n")
+        #zapisywanie
+
+        print("Saving Test Info...")
+        print("Path: ", self.info_path)
 
         try:
             f = open(self.info_path,"w+")
+
+            f.write("Confusion matrix: \n")
+
+            for i in range(int(len(labels)/confusion_size)):
+                f.write(" ")
+            f.write(labels + "\n")
+
+            for i in range(confusion_size):
+                f.write("[" + str(labels_matrix[i]) + "]")
+                f.write(str(confusion_matrix[i]) + "\n")
+
+            f.close()
         except:
-            print("Writing failed")'''
+            print("Writing failed")
 
     def simplify_predicted(self,predicted:[]):
         print("Simplifying predicted model...")

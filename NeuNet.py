@@ -141,7 +141,7 @@ class NeuNet:
         self.neural_net.print_classified_new()
         print("")
 
-    def Think_from_File(self,test_inputs:[],test_outputs:[],filename = "untitled"):
+    def Think_from_File(self,test_inputs:[],test_outputs:[],filename = "untitled",labels_matrix = []):
         print(self.ID,"Testing all data...")
 
         inp = []
@@ -157,6 +157,6 @@ class NeuNet:
 
         wyniki = self.neural_net.test_training(test_inputs,test_outputs)
         tf = Think_File(filename)
-        tf.save_think_output(inp,test_outputs,wyniki)
+        tf.save_think_output(inp,test_outputs,wyniki,self.names,labels_matrix)
 
         print("\n\n")
