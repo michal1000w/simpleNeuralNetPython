@@ -202,16 +202,18 @@ class Think_File:
 
         data_len = int(len(inp))
 
+        predicted_simple = self.simplify_predicted(predicted)
         try:
             f = open(self.path,"w+")
             f.write("[input][real output][predicted output]\n")
             for i in range(data_len):
-                f.write(inp[i].getString() + " " + out[i].getString(True) + " " + predicted[i].getString()+"\n")
+                f.write(inp[i].getString() + " " + out[i].getString(True) + " " + predicted_simple[i].getString(True)+"\n")
             f.close()
             print("Saved")
         except Exception as e:
             print("Writing failed " + e)
 
+        
         '''print("Saving Test Info...")
         print("Path: ", self.filename)
 
@@ -219,3 +221,35 @@ class Think_File:
             f = open(self.info_path,"w+")
         except:
             print("Writing failed")'''
+
+    def simplify_predicted(self,predicted:[]):
+        print("Simplifying predicted model...")
+        output_count = len(predicted[0].getArray()[0])
+        predicted_count = len(predicted)
+
+        output = []
+        
+        for i in range(predicted_count):
+            max_val = max(predicted[i].getArray()[0])
+            max_pos = 0
+
+            for j in range(output_count):
+                if (predicted[i].getArray()[0][j] == max_val):
+                    max_pos = j
+                    break
+            
+            #zapis wyniku
+            data = "["
+            for j in range(output_count):
+                if (j == max_pos):
+                    data += "1"
+                else:
+                    data += "0"
+                if (j < output_count - 1):
+                    data += ","
+            data += "]"
+
+            output.append(Matrix.Matrix(data))
+
+        return output
+
