@@ -283,7 +283,7 @@ class Matrix:
         return Matrix("",y,x,helper)
 
     #przeciążenia operatorów
-    def __add__(self, o):
+    def __add__(self, o): # + dodawanie macierzy
         y = self.wiersze
         x = self.kolumny
 
@@ -313,7 +313,7 @@ class Matrix:
             print("Błąd przy dodawaniu [+=]")
         return self
 
-    def __sub__(self, o):
+    def __sub__(self, o): # - odejmowanie macierzy
         y = self.wiersze
         x = self.kolumny
 
@@ -394,7 +394,7 @@ class Matrix:
             print("Błąd przy mnożeniu elementów [**]")
             return Matrix("[]")
 
-    def __mod__(self, o): #  %
+    def __mod__(self, o): #  % mnożenie przez stałą
         y = self.wiersze
         x = self.kolumny
 
@@ -415,7 +415,7 @@ class Matrix:
             print("Błąd przy mnożeniu przez stałą [%]")
             return Matrix("[]")
 
-    def __truediv__(self, o): #/
+    def __truediv__(self, o): # / dzielenie przez stałą
         y = self.wiersze
         x = self.kolumny
 

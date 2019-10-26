@@ -73,6 +73,11 @@ class NeuNet:
 
     def add_testing_data(self,test_inputs:[],test_outputs:[]):
         self.test_inputs = test_inputs
+
+        if (self.sigm):
+            for i in range(len(test_inputs)):
+                self.test_inputs[i] = self.test_inputs[i].sigmoid()
+
         self.test_outputs = test_outputs
 
     def Setup(self):
@@ -136,5 +141,8 @@ class NeuNet:
 
     def Think_from_File(self,test_inputs:[],test_outputs:[]):
         print(self.ID,"Testing all data...")
+        if (self.sigm):
+            for i in range(len(test_inputs)):
+                test_inputs[i] = test_inputs[i].sigmoid()
         loss = self.neural_net.test_loss(test_inputs,test_outputs)
         print("Loss: ",loss)

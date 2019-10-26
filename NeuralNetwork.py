@@ -47,6 +47,8 @@ class NeuralNetwork:
         self.synaptic_weights.add(weights)
         self.synaptic_weights = self.synaptic_weights.T()
 
+        self.synaptic_weights_single = Matrix.Matrix(self.synaptic_weights.getString())
+
     def load_synaptic_weights(self,weights:Matrix.Matrix):
         self.synaptic_weights = weights
     
@@ -95,6 +97,9 @@ class NeuralNetwork:
         modulo = 5 * (iterations / 100)
 
         print("[Single Threaded training]")
+        from msvcrt import getch, kbhit
+        print("Press any key to end training")
+
         print(" [ ",end="")
 
         for i in range(iterations):
@@ -102,14 +107,20 @@ class NeuralNetwork:
                 print(str((i*100)/iterations)+"% ",end="",flush=True)
             
             #algorytm start
-            output = self.think(training_inputs)
+            output = self.nthink(training_inputs)
             error = training_outputs - output
 
             adjustment = training_inputs.T() * (output.sigmoid_derivative() ** error)
 
-            self.synaptic_weights += adjustment
+            self.synaptic_weights_single += adjustment
+
+            if (kbhit()): #przerwanie
+                    print(" [przerwanie] ", end="", flush=True)
+                    break
         
+        #self.synaptic_weights = self.synaptic_weights / 8
         print(" 100% ]")
+        self.synaptic_weights = self.synaptic_weights_single
 
     def think(self,inputs:Matrix.Matrix,realOutput = Matrix.Matrix("[]")):
         self.wynik = (inputs * self.synaptic_weights).sigmoid() #oblicza spodziewany wynik
@@ -119,6 +130,10 @@ class NeuralNetwork:
             self.loss = (realOutput - self.wynik).square().mean()
             print("Loss: ", self.loss)
 
+        return self.wynik
+
+    def nthink(self,inputs:Matrix.Matrix):
+        self.wynik = (inputs * self.synaptic_weights_single).sigmoid()
         return self.wynik
 
     def test_loss(self,test_inputs:[],test_outputs:[]):
@@ -225,6 +240,10 @@ class NeuralNetwork:
         #przechodzenie na tryb jednordzeniowy jeżeli mało danych
         if (cpu_count == 1):
             self.train(training_inputs,training_outputs,iterations)
+            print("Training is done")
+
+            ex = Export(self.name)
+            ex.save_weights(self.synaptic_weights)
         else:
             if (data_count >= cpu_count):
                 batch_size = int(data_count / cpu_count)
