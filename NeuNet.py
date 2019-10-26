@@ -4,9 +4,12 @@ import NeuralNetwork
 
 class NeuNet:
     def __init__(self,experimental=False,sigm = True):
-        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1,0,0)
+        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1,0,0,[],[])
         self.training_inputs = Matrix.Matrix("")
         self.training_outputs = Matrix.Matrix("")
+
+        self.test_inputs = []
+        self.test_outputs = []
 
         self.ID = "[NeuNet] "
         self.sigm = sigm
@@ -68,15 +71,19 @@ class NeuNet:
     def go_experimental(self,experimental:bool):
         self.experimental = experimental
 
+    def add_testing_data(self,test_inputs:[],test_outputs:[]):
+        self.test_inputs = test_inputs
+        self.test_outputs = test_outputs
+
     def Setup(self):
         print(self.ID,"Starting Setup...")
-        if (not(self.training_inputs.mat == [] or self.training_outputs.mat == [] or self.iteration == 0 or len(self.neural_net.nazwy) == 0)):
+        if (not(self.training_inputs.mat == [] or self.training_outputs.mat == [] or self.iteration == 0 or len(self.neural_net.nazwy) == 0 or self.test_inputs == [] or self.test_outputs == [])):
             print(self.ID,"Setting up NeuralNetwork")
 
             if(self.experimental):
                 print(self.ID,"!!!!Experimental mode enable (may cause some bugs)!!!!")
 
-            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force)
+            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force,self.test_inputs,self.test_outputs)
             neur.add_names(self.names)
             self.neural_net = neur
 

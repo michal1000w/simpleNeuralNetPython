@@ -9,7 +9,7 @@ import os
 import time
 
 class NeuralNetwork:
-    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int,threads:int,force:bool):
+    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int,threads:int,force:bool,test_inputs:[],test_outputs:[]):
         random.seed(seed)
         self.SEED = seed
         self.neuron_count = neuron_count
@@ -17,6 +17,9 @@ class NeuralNetwork:
         self.threads = threads
         self.result_list = []
         self.force = force
+
+        self.test_inputs = test_inputs
+        self.test_outputs = test_outputs
 
         self.synaptic_weights = Matrix.Matrix("")
         self.wynik = Matrix.Matrix("")
@@ -320,10 +323,13 @@ class NeuralNetwork:
             print("Press any key to end training")
             print("[ ",end="")
             freeze_support()
+            loss_value = 0.0
             for j in range(int(iterations/100)):
                 #wypisanie postępu
                 if (j%modulo == 0):
                     print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
+                    loss_value = self.test_loss(self.test_inputs,self.test_outputs)
+                    print("Loss: ",loss_value,flush=True)
                 weights = Matrix.Matrix(string)
 
                 pool = Pool(cores_used)
@@ -343,6 +349,9 @@ class NeuralNetwork:
                     weights += self.synaptic_batches[i]
                 weights = weights/cores_used
                 self.average_weight[0] = weights
+
+                #for testing
+                self.synaptic_weights = self.average_weight[0]
 
 
             #Starting Loop OLD

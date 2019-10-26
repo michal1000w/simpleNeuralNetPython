@@ -8,10 +8,10 @@ import Import
 if __name__ == '__main__':  
     experimental = True
 
-    net = NeuNet.NeuNet() #dla IRIS
-    #net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
+    #net = NeuNet.NeuNet() #dla IRIS
+    net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
 
-    im = Import.Import("INPUT\Training_Data\iris.txt")
+    im = Import.Import("INPUT\Training_Data\kr-vs-kp.txt")
 
     net.input(im.get_input())
     net.output(im.get_output())
@@ -22,21 +22,22 @@ if __name__ == '__main__':
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(16)
+    net.set_threads(0)
     #net.force_threads(True)  #to set up more threads than CPU cores
 
+    tin = Import.Import("INPUT\Test_Data\kr-vs-kp.txt") #import test_data
+    net.add_testing_data(tin.get_input_matrix(),tin.get_output_matrix())
+
     net.Setup()
-    net.set_name("Iris")
+    net.set_name("Kr_test")
 
     #load network from file
-    nim = Import.NetImport("OUTPUT\Saved_Networks\Iris.txt")
+    '''nim = Import.NetImport("OUTPUT\Saved_Networks\Kr-vs-Kp.txt")
     net.load_synaptic_weights(nim.get_weights())
-    net.print_synaptic_weights()
-
-    tin = Import.Import("INPUT\Test_Data\iris.txt")
+    net.print_synaptic_weights()'''
 
     if (experimental):  
-        #net.Train()
+        net.Train()
         net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix())
         '''net.Think("[5.5,3.6,1.4,0.1]","[1,0,0]") #iris-setosa
         net.Think("[6.7,2.9,4.4,1.2]","[0,1,0]") #iris-versicolor
@@ -50,7 +51,6 @@ if __name__ == '__main__':
         try:
             net.Train()
 
-            net.Think("[5.5,3.6,1.4,0.1]")
-            net.Think("[6.7,2.9,4.4,1.2]")
+            net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix())
         except:
             print("Training Failed (Maybe too much input data -> try multithreaded workflow)")
