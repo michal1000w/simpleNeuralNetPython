@@ -8,10 +8,10 @@ import Import
 if __name__ == '__main__':  
     experimental = True
 
-    #net = NeuNet.NeuNet() #dla IRIS
-    net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
+    net = NeuNet.NeuNet() #dla IRIS
+    #net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
 
-    im = Import.Import("INPUT\Training_Data\kr-vs-kp.txt")
+    im = Import.Import("INPUT\Training_Data\\abalone.txt")
 
     net.input(im.get_input())
     net.output(im.get_output())
@@ -22,14 +22,14 @@ if __name__ == '__main__':
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(0)
-    #net.force_threads(True)  #to set up more threads than CPU cores
+    net.set_threads(64)
+    net.force_threads(True)  #to set up more threads than CPU cores
 
-    tin = Import.Import("INPUT\Test_Data\kr-vs-kp.txt") #import test_data
+    tin = Import.Import("INPUT\Test_Data\\abalone.txt") #import test_data
     net.add_testing_data(tin.get_input_matrix(),tin.get_output_matrix())
 
     net.Setup()
-    net.set_name("Kr_test")
+    net.set_name("Abalone")
 
     #load network from file
     '''nim = Import.NetImport("OUTPUT\Saved_Networks\Abalone.txt")
@@ -38,22 +38,22 @@ if __name__ == '__main__':
 
     if (experimental):  
         net.Train()
-        net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix())
+        net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix(),"Abalone")
         '''net.Think("[5.5,3.6,1.4,0.1]","[1,0,0]") #iris-setosa
         net.Think("[6.7,2.9,4.4,1.2]","[0,1,0]") #iris-versicolor
         '''
-        net.Think("[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0]","[1,0]") #win
+        '''net.Think("[0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,1,0]","[1,0]") #win
         net.Think("[0,0,0,0,1,1,1,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,1,0]","[0,1]") #lose
-        
-        '''net.Think("[0.44,0.365,0.125,0.516,0.2155,0.114,0.155,10]") #m
+        '''
+        net.Think("[0.44,0.365,0.125,0.516,0.2155,0.114,0.155,10]") #m
         net.Think("[0.605,0.5,0.185,1.1185,0.469,0.2585,0.335,9]") #f
         net.Think("[0.365,0.295,0.095,0.25,0.1075,0.0545,0.08,9]") #i
-        '''
+        
     else:   
         try:
             net.Train()
 
-            net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix())
+            net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix(),"Abalone")
         except Exception as e:
             print("Training Failed (Maybe too much input data -> try multithreaded workflow)")
             print(e)

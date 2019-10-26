@@ -165,7 +165,7 @@ class Matrix:
     def getArray(self):
         return self.mat
     
-    def getString(self):
+    def getString(self,is_int = False):
         y = self.wiersze
         x = self.kolumny
 
@@ -173,7 +173,10 @@ class Matrix:
         for i in range(y):
             data += "["
             for j in range(x):
-                data += str(self.mat[i][j])
+                if (not(is_int)):
+                    data += str(self.mat[i][j])
+                else:
+                    data += str(int(self.mat[i][j]))
                 if (j < x-1):
                     data += ","
             data += "]"

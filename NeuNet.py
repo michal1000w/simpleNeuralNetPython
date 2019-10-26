@@ -1,6 +1,7 @@
 import time
 import Matrix
 import NeuralNetwork
+from Import import Think_File
 
 class NeuNet:
     def __init__(self,experimental=False,sigm = True):
@@ -140,11 +141,22 @@ class NeuNet:
         self.neural_net.print_classified_new()
         print("")
 
-    def Think_from_File(self,test_inputs:[],test_outputs:[]):
+    def Think_from_File(self,test_inputs:[],test_outputs:[],filename = "untitled"):
         print(self.ID,"Testing all data...")
+
+        inp = []
+        for i in range(len(test_inputs)):
+            inp.append(Matrix.Matrix(test_inputs[i].getString()))
+
         if (self.sigm):
             for i in range(len(test_inputs)):
                 test_inputs[i] = test_inputs[i].sigmoid()
         loss = self.neural_net.test_loss(test_inputs,test_outputs)
         print("Loss: ",loss)
+        print("\n\n")
+
+        wyniki = self.neural_net.test_training(test_inputs,test_outputs)
+        tf = Think_File(filename)
+        tf.save_think_output(inp,test_outputs,wyniki)
+
         print("\n\n")

@@ -89,14 +89,24 @@ class Import:
 
     def get_input_matrix(self):
         matrix = []
+        mat = Matrix.Matrix(self.get_input())
         for i in range(len(self.Input)):
-            matrix.append(Matrix.Matrix(self.get_input()))
+            arr = Matrix.Matrix("")
+            arr.add(str(mat.getArray()[i]).replace(" ",""))
+            matrix.append(arr)
+            #matrix.append(Matrix.Matrix(self.get_input()))
+
         return matrix
 
     def get_output_matrix(self):
         matrix = []
+        mat = Matrix.Matrix(self.get_output())
+        mat = mat.T()
         for i in range(len(self.Output)):
-            matrix.append(Matrix.Matrix(self.get_output()))
+            #matrix.append(Matrix.Matrix(self.get_output()))
+            arr = Matrix.Matrix("")
+            arr.add(str(mat.getArray()[i]).replace(" ",""))
+            matrix.append(arr)
         return matrix
 
     def get_labels(self):
@@ -183,3 +193,29 @@ class Export:
 class Think_File:
     def __init__(self,filename:str):
         self.filename = filename
+        self.path = "OUTPUT\Labeled_Data\\" + filename + ".txt"
+        self.info_path = "OUTPUT\Labeled_Data\\" + filename + "-info.txt"
+
+    def save_think_output(self,inp:[],out:[],predicted:[]):
+        print("Saving Think Output...")
+        print("Path: ",self.path)
+
+        data_len = int(len(inp))
+
+        try:
+            f = open(self.path,"w+")
+            f.write("[input][real output][predicted output]\n")
+            for i in range(data_len):
+                f.write(inp[i].getString() + " " + out[i].getString(True) + " " + predicted[i].getString()+"\n")
+            f.close()
+            print("Saved")
+        except Exception as e:
+            print("Writing failed " + e)
+
+        '''print("Saving Test Info...")
+        print("Path: ", self.filename)
+
+        try:
+            f = open(self.info_path,"w+")
+        except:
+            print("Writing failed")'''

@@ -158,11 +158,22 @@ class NeuralNetwork:
         #obliczanie sumy funkcji loss
         suma = 0.0
         for i in range(data_count):
-            suma += (test_outputs[i].T() - wyniki[i]).square().mean()
+            suma += (test_outputs[i] - wyniki[i]).square().mean()
 
         mianownik = float(data_count)
         
         return suma / mianownik
+
+    def test_training(self,test_inputs:[],test_outputs:[]):
+        data_count = len(test_inputs)
+        wyniki = []
+        #obliczanie wyników dla danych testowych
+        for i in range(data_count):
+            wyniki.append(self.think(test_inputs[i],Matrix.Matrix("[]")))
+
+        return wyniki
+
+
 
     #multithreading
 
