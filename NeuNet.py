@@ -136,7 +136,8 @@ class NeuNet:
         if (self.sigm):
             nowa = nowa.sigmoid()
         self.neural_net.think(nowa,rOut).printMatrix(0)
-        self.neural_net.print_classified()
+        #self.neural_net.print_classified()
+        self.neural_net.print_classified_new()
         print("")
 
     def Think_from_File(self,test_inputs:[],test_outputs:[]):
@@ -146,3 +147,4 @@ class NeuNet:
                 test_inputs[i] = test_inputs[i].sigmoid()
         loss = self.neural_net.test_loss(test_inputs,test_outputs)
         print("Loss: ",loss)
+        print("\n\n")

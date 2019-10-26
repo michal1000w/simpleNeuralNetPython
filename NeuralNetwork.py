@@ -67,6 +67,17 @@ class NeuralNetwork:
                 print("[",self.nazwy[i],"]", end="")
         print("")
 
+    def print_classified_new(self):
+        klasy = self.neuron_count
+        max_val = max(self.wynik.getArray()[0])
+        max_pos = 0
+
+        for i in range(klasy):
+            if (self.wynik.getArray()[0][i] == max_val):
+                max_pos = i
+                break
+        print("[",self.nazwy[max_pos],"] z prawdopodobieństwem:",max_val)
+
     def print_names(self):
         print("Stored names: ", end="")
         for i in range(len(self.nazwy)):

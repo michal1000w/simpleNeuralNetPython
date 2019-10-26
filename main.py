@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(1)
+    net.set_threads(0)
     #net.force_threads(True)  #to set up more threads than CPU cores
 
     tin = Import.Import("INPUT\Test_Data\kr-vs-kp.txt") #import test_data
