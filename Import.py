@@ -87,6 +87,18 @@ class Import:
 
         return data
 
+    def get_input_matrix(self):
+        matrix = []
+        for i in range(len(self.Input)):
+            matrix.append(Matrix.Matrix(self.get_input()))
+        return matrix
+
+    def get_output_matrix(self):
+        matrix = []
+        for i in range(len(self.Output)):
+            matrix.append(Matrix.Matrix(self.get_output()))
+        return matrix
+
     def get_labels(self):
         length = len(self.Labels[0]) #długość stringa
         labels = []

@@ -112,12 +112,28 @@ class NeuralNetwork:
         self.wynik = (inputs * self.synaptic_weights).sigmoid() #oblicza spodziewany wynik
 
         #obliczanie funkcji loss
-        if (not(realOutput.getString() == "")):
+        if (not(realOutput.getString() == "" or realOutput.getString() == "[]")):
             self.loss = (realOutput - self.wynik).square().mean()
             print("Loss: ", self.loss)
 
         return self.wynik
 
+    def test_loss(self,test_inputs:[],test_outputs:[]):
+        data_count = len(test_inputs)
+        wyniki = []
+
+        #obliczanie wyników dla danych testowych
+        for i in range(data_count):
+            wyniki.append(self.think(test_inputs[i],Matrix.Matrix("[]")))
+
+        #obliczanie sumy funkcji loss
+        suma = 0.0
+        for i in range(data_count):
+            suma += (test_outputs[i].T() - wyniki[i]).square().mean()
+
+        mianownik = float(data_count)
+        
+        return suma / mianownik
 
     #multithreading
 

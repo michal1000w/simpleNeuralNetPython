@@ -126,3 +126,8 @@ class NeuNet:
         self.neural_net.think(nowa,rOut).printMatrix(0)
         self.neural_net.print_classified()
         print("")
+
+    def Think_from_File(self,test_inputs:[],test_outputs:[]):
+        print(self.ID,"Testing all data...")
+        loss = self.neural_net.test_loss(test_inputs,test_outputs)
+        print("Loss: ",loss)
