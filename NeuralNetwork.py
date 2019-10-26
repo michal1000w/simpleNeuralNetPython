@@ -35,7 +35,7 @@ class NeuralNetwork:
                 liczba = str((random.random() * 2) - 1)
                 for z in range(len(liczba)):
                     weights += liczba[z]
-                if (i == neuron_count):
+                if (i == neuron_inputs):
                     weights += ' '
                 else:
                     weights += ','
