@@ -80,7 +80,7 @@ class NeuNet:
             neur.add_names(self.names)
             self.neural_net = neur
 
-            print(self.ID,"Random starting synaptic weights:")
+            print(self.ID,"Random generated synaptic weights:")
             self.neural_net.print_synaptic_weights()
             print("")
             self.setup = True
@@ -115,12 +115,14 @@ class NeuNet:
             return 0
         return 0
 
-    def Think(self,data:str):
+    def Think(self,data:str,realOutput = ""):
         print(self.ID,"Considering new situation:",data)
         nowa = Matrix.Matrix("")
         nowa.add(data)
+        rOut = Matrix.Matrix("")
+        rOut.add(realOutput)
         if (self.sigm):
             nowa = nowa.sigmoid()
-        self.neural_net.think(nowa).printMatrix(0)
+        self.neural_net.think(nowa,rOut).printMatrix(0)
         self.neural_net.print_classified()
         print("")

@@ -167,3 +167,7 @@ class Export:
             print("Saved")
         except:
             print("Writing failed")
+
+class Think_File:
+    def __init__(self,filename:str):
+        self.filename = filename

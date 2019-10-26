@@ -255,6 +255,33 @@ class Matrix:
 
         return Matrix("",y,x,helper)
 
+    def mean(self): #średnia arytmetyczna
+        output = 0.0
+        count = self.wiersze + self.kolumny
+        suma = 0.0
+
+        for i in range(self.wiersze):
+            for j in range(self.kolumny):
+                suma += self.mat[i][j]
+
+        output = float(suma / float(count))
+
+        return output
+
+    def square(self):
+        helper = []
+
+        y = self.wiersze
+        x = self.kolumny
+
+        for i in range(y):
+            rowList = []
+            for j in range(x):
+                rowList.append(self.mat[i][j] ** 2.0)
+            helper.append(rowList)
+
+        return Matrix("",y,x,helper)
+
     #przeciążenia operatorów
     def __add__(self, o):
         y = self.wiersze

@@ -108,9 +108,16 @@ class NeuralNetwork:
         
         print(" 100% ]")
 
-    def think(self,inputs:Matrix.Matrix):
-        self.wynik = (inputs * self.synaptic_weights).sigmoid()
+    def think(self,inputs:Matrix.Matrix,realOutput = Matrix.Matrix("[]")):
+        self.wynik = (inputs * self.synaptic_weights).sigmoid() #oblicza spodziewany wynik
+
+        #obliczanie funkcji loss
+        if (not(realOutput.getString() == "")):
+            self.loss = (realOutput - self.wynik).square().mean()
+            print("Loss: ", self.loss)
+
         return self.wynik
+
 
     #multithreading
 
