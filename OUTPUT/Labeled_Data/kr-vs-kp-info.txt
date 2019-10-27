@@ -2,3 +2,5 @@ Confusion matrix:
      [won][lose]
 [won][23, 3]
 [lose][3, 30]
+
+Skutecznoœæ: 89.83050847457628%

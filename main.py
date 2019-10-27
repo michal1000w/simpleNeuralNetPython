@@ -13,8 +13,8 @@ if __name__ == '__main__':
     else:
         net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
 
-    name = "abalone"
-    net_name = "Abalone"
+    name = "iris"
+    net_name = "Iris"
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data
 
@@ -22,12 +22,12 @@ if __name__ == '__main__':
     net.output(im.get_output())
     net.labels(im.get_labels())
 
-    net.iterations(60000) #30000 iris
+    net.iterations(30000) #30000 iris
     #net.seed(4) #optional
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(48)
+    net.set_threads(2)
     net.force_threads(True)  #to set up more threads than CPU cores
 
     tin = Import.Import("INPUT\Test_Data\\" + name + ".txt") #import test_data

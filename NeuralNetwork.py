@@ -109,13 +109,15 @@ class NeuralNetwork:
 
         print("[Single Threaded training]")
         from msvcrt import getch, kbhit
-        print("Press any key to end training")
+        print("Press any key to end training\n\n")
 
         print(" [ ",end="")
 
         for i in range(iterations):
             if (i%modulo == 0):
                 print(str((i*100)/iterations)+"% ",end="",flush=True)
+                loss_value = self.test_loss(self.test_inputs,self.test_outputs)
+                print("Loss: ",loss_value,flush=True)
             
             #algorytm start
             output = self.nthink(training_inputs)
@@ -128,6 +130,7 @@ class NeuralNetwork:
             if (kbhit()): #przerwanie
                     print(" [przerwanie] ", end="", flush=True)
                     break
+            self.synaptic_weights = self.synaptic_weights_single #new
         
         #self.synaptic_weights = self.synaptic_weights / 8
         print(" 100% ]")
