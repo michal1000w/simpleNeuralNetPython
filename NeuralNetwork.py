@@ -179,6 +179,26 @@ class NeuralNetwork:
 
 
     #multithreading
+    def lthink(self,inputs:Matrix.Matrix,synaptic_weights:Matrix.Matrix):
+        self.wynik = (inputs * synaptic_weights).sigmoid()
+        return self.wynik
+
+    def create_loss_weights(self,test_inputs:[],test_outputs:[],synaptic_weights:Matrix.Matrix):
+        data_count = len(test_inputs)
+        wyniki = []
+
+        #obliczanie wyników dla danych testowych
+        for i in range(data_count):
+            wyniki.append(self.lthink(test_inputs[i],synaptic_weights))
+
+        #obliczanie sumy funkcji loss
+        suma = 0.0
+        for i in range(data_count):
+            suma += (test_outputs[i] - wyniki[i]).square().mean()
+
+        mianownik = float(data_count)
+        
+        return suma / mianownik
 
     def mtrain(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int,lock:Lock,ID:int,cores_used:int):
         output = Matrix.Matrix("")
@@ -388,11 +408,25 @@ class NeuralNetwork:
                     print(" [przerwanie] ", end="", flush=True)
                     break
 
-                #combine batches
-                for i in range(cores_used):
+                #combine batches OLD
+                '''for i in range(cores_used):
                     weights += self.synaptic_batches[i]
                 weights = weights/cores_used
+                self.average_weight[0] = weights'''
+
+                #combine batches NEW
+                #creating mean weights
+                mean_weights = []
+                mean_weights_sum = 0.0
+                for i in range(cores_used):
+                    mean_weights.append(1 / self.create_loss_weights(self.test_inputs,self.test_outputs,self.synaptic_batches[i]))
+                    #print(mean_weights)
+                    weights += self.synaptic_batches[i] % mean_weights[i]
+                    mean_weights_sum += mean_weights[i]
+                weights = weights/mean_weights_sum
                 self.average_weight[0] = weights
+                
+
 
                 #for testing
                 self.synaptic_weights = self.average_weight[0]
