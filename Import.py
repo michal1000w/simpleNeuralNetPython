@@ -242,6 +242,12 @@ class Think_File:
                 for j in range(confusion_size):
                     confusion_matrix[i][j] = int(confusion_matrix[i][j])
 
+        #obliczanie procentu
+        poprawne = 0.0
+        for i in range(confusion_size):
+            poprawne += confusion_matrix[i][i]
+        procent_poprawnych = (poprawne * 100.0) / float(len(predicted))
+
         #rysowanie
         print("\n\nConfusion Matrix:\n")
         for i in range(int(len(labels)/confusion_size)):
@@ -252,6 +258,8 @@ class Think_File:
             print("[" + str(labels_matrix[i]) + "]",end="")
             print(confusion_matrix[i])
 
+        print("\n")
+        print("Skuteczność: ",procent_poprawnych, "%")
         print("\n\n")
         #zapisywanie
 
@@ -271,7 +279,10 @@ class Think_File:
                 f.write("[" + str(labels_matrix[i]) + "]")
                 f.write(str(confusion_matrix[i]) + "\n")
 
+            f.write("\nSkuteczność: " + str(procent_poprawnych) + "%")
+
             f.close()
+            print("Saved")
         except:
             print("Writing failed")
 

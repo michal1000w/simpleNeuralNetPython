@@ -1,0 +1,4 @@
+Confusion matrix: 
+     [won][lose]
+[won][23, 3]
+[lose][3, 30]
