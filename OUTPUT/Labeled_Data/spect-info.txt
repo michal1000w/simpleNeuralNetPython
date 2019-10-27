@@ -1,0 +1,6 @@
+Confusion matrix: 
+       [chory][zdrowy]
+[chory][172, 0]
+[zdrowy][15, 0]
+
+Skutecznoœæ: 91.97860962566845%

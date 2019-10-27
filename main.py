@@ -8,13 +8,13 @@ import Import
 if __name__ == '__main__':  
     experimental = True
 
-    if (1):
+    if (0):
         net = NeuNet.NeuNet() #dla IRIS
     else:
         net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
 
-    name = "iris"
-    net_name = "Iris"
+    name = "kr-vs-kp"
+    net_name = "Kr-vs-Kp"
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data
 
@@ -27,7 +27,7 @@ if __name__ == '__main__':
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(2)
+    net.set_threads(0)
     net.force_threads(True)  #to set up more threads than CPU cores
 
     tin = Import.Import("INPUT\Test_Data\\" + name + ".txt") #import test_data
