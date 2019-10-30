@@ -196,8 +196,8 @@ class NeuralNetwork:
         for i in range(iterations):
             if (i%modulo == 0):
                 print(str((i*100)/iterations)+"% ",end="",flush=True)
-                loss_value = self.test_loss(self.test_inputs,self.test_outputs)
-                print("Loss: ",loss_value,flush=True)
+                loss_value, skutecznosc = self.test_loss_extended(self.test_inputs,self.test_outputs)
+                print("Loss: ",loss_value," Skutecznosc: ",skutecznosc,"%",flush=True)
         
             from msvcrt import getch
             #algorytm start #1
@@ -283,6 +283,33 @@ class NeuralNetwork:
         mianownik = float(data_count)
         
         return suma / mianownik
+
+    def test_loss_extended(self,test_inputs:[],test_outputs:[]):
+        data_count = len(test_inputs)
+        wyniki = []
+        dobre = 0.0
+
+        #obliczanie wyników dla danych testowych
+        output_count = len(test_outputs[0].getArray()[0])
+        for i in range(data_count):
+            wyniki.append(self.think(test_inputs[i],Matrix.Matrix("[]")))
+
+            max_val = max(wyniki[i].getArray()[0])
+            for j in range(output_count):
+                if (wyniki[i].getArray()[0][j] == max_val):
+                    if (test_outputs[i].getArray()[0][j] == 1):
+                        dobre += 1
+                    break
+        procent_poprawnych = (dobre * 100.0) / float(len(wyniki))
+
+        #obliczanie sumy funkcji loss
+        suma = 0.0
+        for i in range(data_count):
+            suma += (test_outputs[i] - wyniki[i]).square().mean()
+
+        mianownik = float(data_count)
+        
+        return suma / mianownik, procent_poprawnych
 
     def test_training(self,test_inputs:[],test_outputs:[]):
         data_count = len(test_inputs)
@@ -536,12 +563,13 @@ class NeuralNetwork:
             print("[ ",end="")
             freeze_support()
             loss_value = 0.0
+            skutecznosc = 0.0
             for j in range(int(iterations/100)):
                 #wypisanie postępu
                 if (j%modulo == 0):
                     print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
-                    loss_value = self.test_loss(self.test_inputs,self.test_outputs)
-                    print("Loss: ",loss_value,flush=True)
+                    loss_value, skutecznosc = self.test_loss_extended(self.test_inputs,self.test_outputs)
+                    print("Loss: ",loss_value," Skutecznosc: ",skutecznosc,"%",flush=True)
 
                 weights = []
                 for i in range(hidden_Layout_count):

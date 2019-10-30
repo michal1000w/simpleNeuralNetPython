@@ -1,6 +1,6 @@
 Confusion matrix: 
      [won][lose]
-[won][24, 2]
-[lose][3, 30]
+[won][0, 26]
+[lose][2, 31]
 
-Skutecznoœæ: 91.52542372881356%
+Skutecznoœæ: 52.54237288135593%

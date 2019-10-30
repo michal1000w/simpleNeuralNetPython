@@ -11,13 +11,13 @@ def hidden_Layout(data:str):
 if __name__ == '__main__':  
     experimental = True
 
-    if (1):
+    if (0):
         net = NeuNet.NeuNet() #dla IRIS
     else:
         net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
 
-    name = "iris"
-    net_name = "Iris-t"
+    name = "kr-vs-kp"
+    net_name = "Kr-t"
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data
 
@@ -30,14 +30,14 @@ if __name__ == '__main__':
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(2)
+    net.set_threads(0)
     net.force_threads(True)  #to set up more threads than CPU cores
 
     tin = Import.Import("INPUT\Test_Data\\" + name + ".txt") #import test_data
     net.add_testing_data(tin.get_input_matrix(),tin.get_output_matrix())
 
     
-    net.add_hidden_layout(Matrix("[0][2][1][0]"))
+    net.add_hidden_layout(Matrix("[0][6][0]"))
     #net.add_hidden_layout(Matrix("[0][0]")) #no hidden
 
     net.Setup()
