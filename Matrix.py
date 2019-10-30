@@ -108,6 +108,12 @@ class Matrix:
                         print("",round(self.mat[i][j],miejsca),",",end="",flush=True)
                 print("",flush=True)
 
+    def printSize(self):
+        print("\n")
+        print("Wiersze: ",self.wiersze)
+        print("Kolumny: ",self.kolumny)
+        print("\n")
+
     def add(self,data):
         length = len(data)
         fragment = ""
@@ -312,9 +318,17 @@ class Matrix:
             for i in range(self.wiersze):
                 for j in range(self.kolumny):
                     self.mat[i][j] += o.mat[i][j]
-        except:
-            print("Błąd przy dodawaniu [+=]")
+        except Exception as e:
+            print("Błąd przy dodawaniu [+=]   ",end = "")
+            print(e)
         return self
+
+    '''def __iadd__(self, o): # +=
+        for i in range(self.wiersze):
+            for j in range(self.kolumny):
+                self.mat[i][j] += o.mat[i][j]
+
+        return self'''
 
     def __sub__(self, o): # - odejmowanie macierzy
         y = self.wiersze

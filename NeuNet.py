@@ -5,7 +5,7 @@ from Import import Think_File
 
 class NeuNet:
     def __init__(self,experimental=False,sigm = True):
-        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1,0,0,[],[])
+        self.neural_net = NeuralNetwork.NeuralNetwork(1,1,1,0,0,[],[],Matrix.Matrix(""))
         self.training_inputs = Matrix.Matrix("")
         self.training_outputs = Matrix.Matrix("")
 
@@ -24,6 +24,9 @@ class NeuNet:
         self.weights = Matrix.Matrix("")
 
         self.names = ""
+
+        #multilayer
+        self.hidden_Layout = Matrix.Matrix("")
 
         print(self.ID,"Created instance")
 
@@ -81,6 +84,10 @@ class NeuNet:
 
         self.test_outputs = test_outputs
 
+    def add_hidden_layout(self,layout:Matrix.Matrix):
+        print(self.ID,"Adding hidden layout")
+        self.hidden_Layout = layout
+
     def Setup(self):
         print(self.ID,"Starting Setup...")
         if (not(self.training_inputs.mat == [] or self.training_outputs.mat == [] or self.iteration == 0 or len(self.neural_net.nazwy) == 0 or self.test_inputs == [] or self.test_outputs == [])):
@@ -89,12 +96,13 @@ class NeuNet:
             if(self.experimental):
                 print(self.ID,"!!!!Experimental mode enable (may cause some bugs)!!!!")
 
-            neur = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force,self.test_inputs,self.test_outputs)
-            neur.add_names(self.names)
-            self.neural_net = neur
+            
+            self.neural_net = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force,self.test_inputs,self.test_outputs,self.hidden_Layout)
+            self.neural_net.add_names(self.names)
 
             print(self.ID,"Random generated synaptic weights:")
             self.neural_net.print_synaptic_weights()
+            #self.neural_net.print_parameter_b()
             print("")
             self.setup = True
             return 1

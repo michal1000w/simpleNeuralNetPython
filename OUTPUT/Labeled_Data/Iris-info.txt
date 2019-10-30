@@ -1,7 +1,7 @@
 Confusion matrix: 
                [Iris-setosa][Iris-versicolor][Iris-virginica]
-[Iris-setosa][5, 0, 0]
+[Iris-setosa][0, 5, 0]
 [Iris-versicolor][0, 5, 0]
-[Iris-virginica][0, 1, 7]
+[Iris-virginica][0, 8, 0]
 
-Skutecznoœæ: 94.44444444444444%
+Skutecznoœæ: 27.77777777777778%
