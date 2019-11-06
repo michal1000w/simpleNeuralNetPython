@@ -35,6 +35,7 @@ class NeuralNetwork:
         self.synaptic_batches = []
         self.all_synaptic_batches = manager.list()
         self.average_weight = []
+        self.iter = 100
         #deep learning
         self.hidden_Layout = hidden_Layout
         self.all_layer_weights = []
@@ -106,8 +107,8 @@ class NeuralNetwork:
 
             self.parameter_b.append(Matrix.Matrix(weights))
 
-    def load_synaptic_weights(self,weights:Matrix.Matrix): ###TO DO
-        self.synaptic_weights = weights
+    def load_synaptic_weights(self,weights:[]):
+        self.all_layer_weights = weights
     
     def print_parameter_b(self):
         print("\nParameter b: \n")
@@ -130,6 +131,9 @@ class NeuralNetwork:
     def set_name(self,name:str):
         self.name = name
         print("[NeuNet]  Name set:",name)
+
+    def set_iter(self,iter:int):
+        self.iter = iter
 
     def print_classified(self):
         klasy = self.neuron_count
@@ -449,7 +453,7 @@ class NeuralNetwork:
             print("Training is done")
 
             ex = Export(self.name)
-            ex.save_weights(self.synaptic_weights)
+            ex.save_weights(self.all_layer_weights)
         else:
             if (data_count >= cpu_count):
                 batch_size = int(data_count / cpu_count)
@@ -547,7 +551,7 @@ class NeuralNetwork:
             #starting multithreaded server
             #os.environ["OPENBLAS_MAIN_FREE"] = "1" #disable BLAS multithreading
 
-            Iter = 100
+            
             hidden_Layout_count = self.layers_count - 1
             string = []
             for i in range(hidden_Layout_count):
@@ -557,17 +561,18 @@ class NeuralNetwork:
 
             from msvcrt import getch, kbhit
 
-
+            Iter = self.iter #domyślnie 100
             #new multithreaded Loop
+            print("Iter: ",Iter)
             print("Press any key to end training")
             print("[ ",end="")
             freeze_support()
             loss_value = 0.0
             skutecznosc = 0.0
-            for j in range(int(iterations/100)):
+            for j in range(int(iterations/Iter)):
                 #wypisanie postępu
                 if (j%modulo == 0):
-                    print(str(round((j*100)/(iterations/100),0))+"% ",end="",flush=True)
+                    print(str(round((j*100)/(iterations/Iter),0))+"% ",end="",flush=True)
                     loss_value, skutecznosc = self.test_loss_extended(self.test_inputs,self.test_outputs)
                     print("Loss: ",loss_value," Skutecznosc: ",skutecznosc,"%",flush=True)
 
@@ -688,9 +693,9 @@ class NeuralNetwork:
 
             print("Training is done")
 
-            ex = Export(self.name) ############TO DO
+            ex = Export(self.name)
 
-            ex.save_weights(self.all_layer_weights[0])
+            ex.save_weights(self.all_layer_weights)
 
             '''
             print("Registering processes: [",end="")

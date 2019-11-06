@@ -154,29 +154,47 @@ class NetImport:
             #opracowanie danych
             length = len(data)
             fragment = ""
+            layers = []
 
+            #getting layers
             i1 = 0
-            while (i1 < length):
-                if (data[i1] == '['):
+            while (i1 < length):    
+                if (data[i1] == '{'):
                     fragment = ""
                     while (i1 < length - 1):
                         i1 += 1
-                        if (data[i1] == ']'):
+                        if (data[i1] == '}'):
                             break
                         fragment += data[i1]
-                    self.Weights.append(fragment)
+                    layers.append(fragment)
                 i1 += 1
-        except:
-            print("Can't open the file:",path)
+
+            self.Weights = layers
+
+            '''#getting weights
+            for j in range(len(layers)):    
+                i1 = 0
+                length = len(layers[j])
+                while (i1 < length):
+                    if (layers[j][i1] == '['):
+                        fragment = ""
+                        while (i1 < length - 1):
+                            i1 += 1
+                            if (layers[j][i1] == ']'):
+                                break
+                            fragment += layers[j][i1]
+                        self.Weights.append(fragment)
+                    i1 += 1'''
+        except Exception as e:
+            print("Can't open the file:",path, e)
 
     def get_weights(self):
         length = len(self.Weights)
 
-        data = ""
-        for i in range(length):
-            data += "[" + self.Weights[i] + "]"
-        
-        output = Matrix.Matrix(data)
+        output = []
+        for j in self.Weights:
+            output.append(Matrix.Matrix(j))
+
         return output
 
 class Export:
@@ -184,13 +202,14 @@ class Export:
         self.file_name = filename
         self.path = "OUTPUT\Saved_Networks\\" + filename + ".txt"
 
-    def save_weights(self,weights:Matrix.Matrix):
+    def save_weights(self,weights:[]):
         print("Saving weights...")
         print("Path: ",self.path)
 
         try:
             f = open(self.path,"w+")
-            f.write(weights.getString())
+            for i in weights:
+                f.write("{ " + i.getString() + " }\n")
             f.close()
             print("Saved")
         except:

@@ -21,7 +21,8 @@ class NeuNet:
         self.experimental = experimental
         self.force = False
 
-        self.weights = Matrix.Matrix("")
+        #self.weights = Matrix.Matrix("")
+        self.weights = []
 
         self.names = ""
 
@@ -48,7 +49,7 @@ class NeuNet:
         self.neural_net.add_names(names)
         self.names = names
 
-    def load_synaptic_weights(self,weights:Matrix.Matrix):
+    def load_synaptic_weights(self,weights:[]):
         print("Loading synaptic weights...")
         self.weights = weights
         self.neural_net.load_synaptic_weights(weights)
@@ -87,6 +88,9 @@ class NeuNet:
     def add_hidden_layout(self,layout:Matrix.Matrix):
         print(self.ID,"Adding hidden layout")
         self.hidden_Layout = layout
+
+    def set_iter(self,iter:int):
+        self.neural_net.set_iter(iter)
 
     def Setup(self):
         print(self.ID,"Starting Setup...")

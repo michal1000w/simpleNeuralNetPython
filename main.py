@@ -11,13 +11,13 @@ def hidden_Layout(data:str):
 if __name__ == '__main__':  
     experimental = True
 
-    if (0):
+    if (1):
         net = NeuNet.NeuNet() #dla IRIS
     else:
         net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
 
-    name = "kr-vs-kp"
-    net_name = "Kr-t"
+    name = "abalone"
+    net_name = "Abalone-2"
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data
 
@@ -25,7 +25,7 @@ if __name__ == '__main__':
     net.output(im.get_output())
     net.labels(im.get_labels())
 
-    net.iterations(30000) #30000 iris
+    net.iterations(1000) #30000 iris
     #net.seed(4) #optional
 
     #experimental
@@ -37,19 +37,24 @@ if __name__ == '__main__':
     net.add_testing_data(tin.get_input_matrix(),tin.get_output_matrix())
 
     
-    net.add_hidden_layout(Matrix("[0][6][0]"))
+    #net.add_hidden_layout(Matrix("[0][6][0]")) #dla kr-vs-kp
+    #net.add_hidden_layout(Matrix("[0][6][2][0]"))
     #net.add_hidden_layout(Matrix("[0][0]")) #no hidden
+    #net.add_hidden_layout(Matrix("[0][5][3][2][3][3][0]")) #niby abalone ale nie działa za dobrze
+    #net.add_hidden_layout(Matrix("[0][5][3][2][0]"))
+    net.add_hidden_layout(Matrix("[0][6][4][0]"))
 
     net.Setup()
     net.set_name(net_name) #set name for the network
+    net.set_iter(100)
 
     #load network from file
-    '''nim = Import.NetImport("OUTPUT\Saved_Networks\\" + net_name + ".txt")
+    nim = Import.NetImport("OUTPUT\Saved_Networks\\" + net_name + ".txt")
     net.load_synaptic_weights(nim.get_weights())
-    net.print_synaptic_weights()'''
+    net.print_synaptic_weights()
 
     if (experimental):  
-        net.Train()
+        #net.Train()
         net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix(),name,im.get_labels_matrix())
         
     else:   
