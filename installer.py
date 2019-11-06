@@ -10,7 +10,8 @@ def isAdmin():
 
 def isInstalled():
     try:
-        import pycuda
+        #import pycuda
+        import cupy
         return True
     except:
         return False
@@ -25,6 +26,7 @@ if __name__ == '__main__':
             print("Already installed")
             system("pause")
         else:
-            system("pip install pycuda")
+            #system("pip install pycuda")
+            system("pip install cupy-cuda101")
             print("[Done]")
             system("pause")

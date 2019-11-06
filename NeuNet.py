@@ -25,6 +25,7 @@ class NeuNet:
         self.weights = []
 
         self.names = ""
+        self.device = 0
 
         #multilayer
         self.hidden_Layout = Matrix.Matrix("")
@@ -60,6 +61,24 @@ class NeuNet:
 
     def set_name(self,name:str):
         self.neural_net.set_name(name)
+
+    def set_device(self,device:str):
+        dev = 0
+        print("Training device set to: ",end="")
+        if (device == "cpu"):
+            dev = 0
+            print("CPU")
+        elif (device == "gpu"):
+            dev = 1
+            print("GPU")
+        else:
+            dev = 0
+            print("CPU")
+            print("Niepoprawny parametr:",device,"\nDo wyboru: \"cpu\"  |  \"gpu\"")
+        print("\n")
+        self.device = dev
+        self.neural_net.set_device(dev)
+
 
     def iterations(self,iter:int):
         self.iteration = abs(iter)
@@ -123,7 +142,10 @@ class NeuNet:
             start_time = time.perf_counter()
 
             if (self.experimental):
-                self.neural_net.train_server(self.training_inputs,self.training_outputs,self.iteration)
+                if (self.device == 0):
+                    self.neural_net.train_server(self.training_inputs,self.training_outputs,self.iteration)
+                else:
+                    self.neural_net.CUDA_train(self.training_inputs,self.training_outputs,self.iteration)
             else:
                 self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
 
