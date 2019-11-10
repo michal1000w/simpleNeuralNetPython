@@ -25,7 +25,7 @@ if __name__ == '__main__':
     net.output(im.get_output())
     net.labels(im.get_labels())
 
-    net.iterations(30000) #30000 iris
+    net.iterations(60000) #30000 iris
     #net.seed(4) #optional
 
     #experimental
@@ -38,9 +38,9 @@ if __name__ == '__main__':
 
     
     #net.add_hidden_layout(Matrix("[0][6][0]"))
-    #net.add_hidden_layout(Matrix("[0][5][0]")) #dla kr-vs-kp
+    net.add_hidden_layout(Matrix("[0][5][0]")) #dla kr-vs-kp
     #net.add_hidden_layout(Matrix("[0][6][2][0]"))
-    net.add_hidden_layout(Matrix("[0][0]")) #no hidden
+    #net.add_hidden_layout(Matrix("[0][0]")) #no hidden
     #net.add_hidden_layout(Matrix("[0][5][3][2][3][3][0]")) #niby abalone ale nie działa za dobrze
     #net.add_hidden_layout(Matrix("[0][5][3][2][0]"))
     #net.add_hidden_layout(Matrix("[0][6][4][0]"))

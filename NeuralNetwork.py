@@ -903,11 +903,14 @@ class NeuralNetwork:
             output = 1
         else:
             output = 0
-        mnoznik = 200
+        mnoznik = 1600
 
-        for i in range(data_count):
-            if (i % int(mnoznik) == 0):
-                output += 1
+        if (not(self.force == True and self.threads > 0)):   
+            for i in range(data_count):
+                if (i % int(mnoznik) == 0):
+                    output += 1
+        else:
+            output = self.threads
 
         return output
 
