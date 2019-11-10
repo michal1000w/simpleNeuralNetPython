@@ -45,7 +45,11 @@ class NeuralNetwork:
         self.all_layer_weights = []
         self.all_layer_weights_single = []
         self.parameter_b = []
+        #GPU
+        self.all_synaptic_weights = manager.list()
+        self.average_weight_cuda = []
 
+        #deep learning
         self.layers_count = len(self.hidden_Layout.getArray())
         self.layers_count_hidden = 0
         
@@ -101,6 +105,7 @@ class NeuralNetwork:
 
             self.all_layer_weights.append(self.synaptic_weights)
             self.all_layer_weights_single.append(self.synaptic_weights_single)
+            self.all_synaptic_weights.append(self.Matrix_to_cupy_single(self.synaptic_weights))
 
     def generate_parameter_b(self):
         for z in range(self.layers_count - 1):
@@ -334,6 +339,18 @@ class NeuralNetwork:
 
 
     #CUDA compute
+    def Matrix_to_cupy_single(self,inputs:Matrix.Matrix):
+        wiersze = len(inputs.getArray())
+        kolumny = len(inputs.getArray()[0])
+
+        output = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+        for i in range(wiersze):
+            for j in range(kolumny):
+                output[i][j] = inputs.getArray()[i][j]
+
+        return output
+
+
     def Matrix_to_cupy(self,train_inputs:Matrix.Matrix,train_outputs:Matrix.Matrix,synaptic_weights:[]):
         #time
         start = time.perf_counter()
@@ -369,13 +386,39 @@ class NeuralNetwork:
                     weights[i][j] = synaptic_weights[z].getArray()[i][j]
             syn_weights.append(weights)
 
+        #test_inputs
+        t_inputs = []
+        length = len(self.test_inputs)
+        for z in range(length):
+            wiersze = len(self.test_inputs[z].getArray())
+            kolumny = len(self.test_inputs[z].getArray()[0])
+
+            mat = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+            for i in range(wiersze):
+                for j in range(kolumny):
+                    mat[i][j] = self.test_inputs[z].getArray()[i][j]
+            t_inputs.append(mat)
+
+        #test_outputs
+        t_outputs = []
+        length = len(self.test_outputs)
+        for z in range(length):
+            wiersze = len(self.test_outputs[z].getArray())
+            kolumny = len(self.test_outputs[z].getArray()[0])
+
+            mat = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+            for i in range(wiersze):
+                for j in range(kolumny):
+                    mat[i][j] = self.test_outputs[z].getArray()[i][j]
+            t_outputs.append(mat)
+
         #time
         duration = time.perf_counter() - start
         print("Copying data done in:",duration,"s")
 
-        return (inputs,outputs,syn_weights)
+        return (inputs,outputs,syn_weights,t_inputs,t_outputs)
 
-    def Convert_Weights(self,synaptic_weights:[]):
+    def Convert_Weights(self,synaptic_weights):
         syn_weights = []
 
         for z in range(len(synaptic_weights)):
@@ -391,13 +434,47 @@ class NeuralNetwork:
 
         return syn_weights
 
+    def think_CUDA(self,inputs,synaptic_weights,sigmoid,layers = 1,ID = 0):
+        output = inputs
+
+        for z in range(self.layers_count - 1):
+            output = sigmoid(output.dot(synaptic_weights[(ID * layers + z)]))
+
+        return output
+
+    def test_loss_eCuda(self,t_in:[],t_out:[],syn_weights,sigmoid):
+        data_count = len(t_in)
+        wyniki = []
+        dobre = 0.0
+
+        #obliczanie wyników testowych
+        output_count = len(t_out[0][0])
+        for i in range(data_count):
+            wyniki.append(self.think_CUDA(t_in[i],syn_weights,sigmoid))
+
+            max_val = max(wyniki[i][0])
+            for j in range(output_count):
+                if (wyniki[i][0][j] == max_val):
+                    if (t_out[i][0][j] == 1):
+                        dobre += 1
+                    break
+        skutecznosc = (dobre * 100.0) / float(len(wyniki))
+
+        #obliczanie sumy funkcji loss
+        suma = 0.0
+        for i in range(data_count):
+            suma += (cp.square(t_out[i] - wyniki[i])).mean(axis=None)
+
+        mianownik = float(data_count)
+
+        return ((suma/mianownik),skutecznosc)
         
 
     def CUDA_train(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
         print("\n\nTraining device: CUDA")
 
         #converting data
-        inputs, outputs, syn_weights = self.Matrix_to_cupy(training_inputs,training_outputs,self.all_layer_weights)
+        inputs, outputs, syn_weights, t_in, t_out = self.Matrix_to_cupy(training_inputs,training_outputs,self.all_layer_weights)
         
         print("Setting device to primary GPU")
         cp.cuda.Device(0).use()
@@ -437,7 +514,11 @@ class NeuralNetwork:
         for i in range(iterations):
             if (i%modulo == 0):
                 print(str((i*100)/iterations)+"% ",end="",flush=True)
-                #loss tutaj do wstawienia
+                #To z jakiegoś powodu nie chce działać
+                '''
+                loss_value, skutecznosc = self.test_loss_eCuda(t_in,t_out,syn_weights,sigmoid)
+                print("Loss: ",loss_value," Skutecznosc: ",skutecznosc,"%",flush=True)
+                '''
             
             #algorytm start
             wyniki_czastkowe = []
@@ -470,6 +551,7 @@ class NeuralNetwork:
                 j += 1
 
 
+
             if (kbhit()): #przerwanie
                 print(" [przerwanie] ",end="",flush=True)
                 break
@@ -477,6 +559,237 @@ class NeuralNetwork:
 
         print(" 100% ]")
         self.all_layer_weights = self.Convert_Weights(syn_weights)
+
+
+
+    def CUDA_train_batch(self,training_inputs,training_outputs,iterations:int,ID,sigmoid,sigmoid_derivative):
+        layers_number = self.layers_count - 1
+        synaptic_weights = []
+
+        for z in range(layers_number):
+            synaptic_weights.append(self.average_weight_cuda[z])
+        
+        
+
+        for i in range(iterations):
+            #algorytm start
+            wyniki_czastkowe = []
+            output = training_inputs
+            for z in range(layers_number):
+                output = sigmoid(output.dot(synaptic_weights[z]))
+                wyniki_czastkowe.append(output)
+
+            delta = []
+
+            #layer ostatni
+            error = training_outputs - output
+            delta.append(error * sigmoid_derivative(output))
+
+            ilosc_do_przeliczenia = layers_number - 1
+
+            #kolejna layery
+            for z in range(ilosc_do_przeliczenia):
+                error = delta[z].dot(synaptic_weights[ilosc_do_przeliczenia - z].T)
+                delta.append(error * sigmoid_derivative(wyniki_czastkowe[ilosc_do_przeliczenia - z - 1]))
+
+            #calculte adjustments
+            synaptic_weights[0] += (training_inputs.T).dot(delta[ilosc_do_przeliczenia])
+
+            j = 1
+            for z in reversed(range(ilosc_do_przeliczenia)):
+                synaptic_weights[j] += (wyniki_czastkowe[j-1].T).dot(delta[z])
+                j += 1
+
+        for z in range(layers_number):
+            self.all_synaptic_batches[ID * layers_number + z] = synaptic_weights[z]
+
+
+    def CUDA_train_Server(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
+        print("Starting CUDA server...")
+        cp.cuda.Device(0).use()
+
+        #################CUDA KERNELS######################
+        sigmoid = cp.ElementwiseKernel(
+            'float32 in',
+            'float32 out',
+            '''
+            float h = exp(-1 * in);
+            out = 1 / (1 + h);
+            ''',
+            'sigmoid'
+        )
+        sigmoid_derivative = cp.ElementwiseKernel(
+            'float32 in',
+            'float32 out',
+            '''
+            out = in * (1 - in);
+            ''',
+            'sigmoid_derivative'
+        )
+        ###################################################
+
+        #Przygotowanie zmiennych
+        batches_in = []
+        batches_out = []
+        data_count = int(len(training_inputs.getArray()))
+        cpu_count = self.automatic_thread_count_gpu(data_count)
+        all_inputs, all_outputs, all_synaptic_weights, t_in, t_out = self.Matrix_to_cupy(training_inputs,training_outputs,self.all_layer_weights)
+        self.all_synaptic_weights = (all_synaptic_weights)
+
+
+        #przechodzenie na tryb jednordzeniowy gdy mało danych
+        if (cpu_count == 1):
+            self.CUDA_train(training_inputs,training_outputs,iterations)
+            print("Training is done")
+            ex = Export(self.name)
+            ex.save_weights(self.all_layer_weights)
+        else:
+            #ustalenie ilości używanych wątków
+            if (data_count >= cpu_count):
+                batch_size = int(data_count / cpu_count)
+                left_size = data_count - cpu_count*batch_size
+                cores_used = cpu_count
+            else:
+                batch_size = 1
+                left_size = 0
+                cores_used = data_count
+
+            print("\n[Creating Batches]")
+            #print("CPU Threads: ",os.cpu_count())
+            print("Data count: ",data_count)
+            print("Batch size: ",batch_size)
+            print("Left size: ",left_size)
+            print("Threads used: ",cores_used)
+            print("")
+
+            #pamięć współdzielona
+            manager = Manager()
+            self.synaptic_batches = manager.list()
+            self.all_synaptic_batches = manager.list()
+
+            for i in range(self.layers_count - 1):
+                self.synaptic_batches.append(self.all_synaptic_weights[i])
+            
+            self.average_weight_cuda = manager.list()
+            
+            for i in range(self.layers_count - 1):
+                self.average_weight_cuda.append(self.all_synaptic_weights[i])
+
+
+            for i in range(cores_used * (self.layers_count - 1)):
+                self.all_synaptic_batches.append(self.average_weight_cuda[i % (self.layers_count - 1)])
+
+            #creating batches [input data]
+            data_length = int(len(training_inputs.getArray()[0]))
+            left = left_size
+            for i in range(int(cores_used)):
+                mat = []
+                dod = int(left_size - left)
+                for j in range(batch_size):
+                    mat.append(all_inputs[i * batch_size + j + dod])
+                if (left > 0):
+                    mat.append(all_inputs[i * batch_size + batch_size + dod])
+                    left = left - 1
+                    new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
+                else:
+                    new_batch = Matrix.Matrix("",batch_size,data_length,mat)
+                batches_in.append(self.Matrix_to_cupy_single(new_batch))
+
+            #creating batches [output data]
+            data_length = int(len(training_outputs.getArray()[0]))
+            left = left_size
+            for i in range(int(cores_used)):
+                mat = []
+                dod = int(left_size - left)
+                for j in range(batch_size):
+                    mat.append(all_outputs[i * batch_size + j + dod])
+                if (left > 0):
+                    mat.append(all_outputs[i * batch_size + batch_size + dod])
+                    left = left - 1
+                    new_batch = Matrix.Matrix("",batch_size + 1,data_length,mat)
+                else:
+                    new_batch = Matrix.Matrix("",batch_size,data_length,mat)
+                batches_out.append(self.Matrix_to_cupy_single(new_batch))
+
+            #starting multithreaded server
+            hidden_Layout_count = self.layers_count - 1
+
+            
+            mempool = cp.get_default_memory_pool() # GPU memory
+
+            from msvcrt import getch, kbhit
+            Iter = self.iter * 5
+            modulo = 5 * ((iterations / Iter)/100)
+
+            print("Iter: ",Iter)
+            print("Press any key to end training")
+            print("[ ",end="")
+            freeze_support()
+            loss_value = 0.0
+            skutecznosc = 0.0
+
+
+            for j in range(int(iterations/Iter)):
+                #wypisywanie postępu
+                if (j%modulo == 0):
+                    print(str(round((j*100)/(iterations/Iter),0))+"% ",end="",flush=True)
+                    loss_value, skutecznosc = self.test_loss_eCuda(t_in,t_out,self.average_weight_cuda,sigmoid)
+                    print("Loss: ",loss_value," Skutecznosc: ",skutecznosc,"%",flush=True)
+                    
+
+                weights = []
+                for i in range(hidden_Layout_count):
+                    weights.append(cp.zeros((self.neuron_inputs[i] * self.neuron_count[i]),dtype=cp.float32).reshape(self.neuron_count[i],self.neuron_inputs[i]))
+
+               
+                for i in range(cores_used):
+                    self.CUDA_train_batch(batches_in[i],batches_out[i],Iter,i,sigmoid,sigmoid_derivative)
+
+                if (kbhit()):
+                    print(" [przerwanie]", end="",flush=True)
+                    break
+
+                #combine batches
+                
+                for z in range(hidden_Layout_count):
+                    mean_weights = []
+                    mean_weights_sum = 0.0
+
+                    for i in range(cores_used):
+                        mean_weights.append(1 / self.create_loss_weights_cuda(t_in,t_out,self.all_synaptic_batches,hidden_Layout_count,i,sigmoid))
+                        weights[z] += (self.all_synaptic_batches[i * hidden_Layout_count + z] * mean_weights[i])
+                        mean_weights_sum += mean_weights[i]
+
+                    weights[z] = weights[z]/mean_weights_sum
+
+                    self.average_weight_cuda[z] = weights[z]
+                
+
+            print(" 100% ]")
+            self.all_layer_weights = self.Convert_Weights(self.average_weight_cuda)
+            self.synaptic_weights = self.Convert_Weights(self.average_weight_cuda)
+            
+            print("Training is done")
+            mempool.free_all_blocks() #free memory
+            ex = Export(self.name)
+            ex.save_weights(self.all_layer_weights)
+
+
+
+    def create_loss_weights_cuda(self,test_inputs,test_outputs,synaptic_weights,layers,ID,sigmoid):
+        data_count = len(test_inputs)
+        wyniki = []
+
+        for i in range(data_count):
+            wyniki.append(self.think_CUDA(test_inputs[i],synaptic_weights,sigmoid,layers,ID))
+
+        suma = 0.0
+        for i in range(data_count):
+            suma += (cp.square(test_outputs[i] - wyniki[i])).mean(axis=None)
+
+        mianownik = float(data_count)
+        
+        return suma/mianownik
 
 
     #multithreading
@@ -582,6 +895,19 @@ class NeuralNetwork:
 
         if (output > cpu_cores):
             output = cpu_cores
+
+        return output
+
+    def automatic_thread_count_gpu(self,data_count:int):
+        if (data_count > 90):
+            output = 1
+        else:
+            output = 0
+        mnoznik = 200
+
+        for i in range(data_count):
+            if (i % int(mnoznik) == 0):
+                output += 1
 
         return output
 

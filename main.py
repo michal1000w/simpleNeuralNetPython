@@ -17,7 +17,7 @@ if __name__ == '__main__':
         net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
 
     name = "kr-vs-kp"
-    net_name = "Abalone-2"
+    net_name = "Abalone-gpu"
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data
 
@@ -37,9 +37,10 @@ if __name__ == '__main__':
     net.add_testing_data(tin.get_input_matrix(),tin.get_output_matrix())
 
     
-    net.add_hidden_layout(Matrix("[0][6][0]")) #dla kr-vs-kp
+    #net.add_hidden_layout(Matrix("[0][6][0]"))
+    #net.add_hidden_layout(Matrix("[0][5][0]")) #dla kr-vs-kp
     #net.add_hidden_layout(Matrix("[0][6][2][0]"))
-    #net.add_hidden_layout(Matrix("[0][0]")) #no hidden
+    net.add_hidden_layout(Matrix("[0][0]")) #no hidden
     #net.add_hidden_layout(Matrix("[0][5][3][2][3][3][0]")) #niby abalone ale nie działa za dobrze
     #net.add_hidden_layout(Matrix("[0][5][3][2][0]"))
     #net.add_hidden_layout(Matrix("[0][6][4][0]"))
@@ -47,7 +48,7 @@ if __name__ == '__main__':
     net.Setup()
     net.set_name(net_name) #set name for the network
     net.set_iter(100)
-    net.set_device("gpu") # "cpu"
+    net.set_device("gpu") # "cpu" "gpu"
 
     #load network from file
     '''nim = Import.NetImport("OUTPUT\Saved_Networks\\" + net_name + ".txt")
@@ -56,11 +57,11 @@ if __name__ == '__main__':
 
     if (experimental):  
         net.Train()
-        net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix(),name,im.get_labels_matrix())
+        net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix(),net_name,im.get_labels_matrix())
         
     else:   
         net.Train()
-        net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix(),name,im.get_labels_matrix())
+        net.Think_from_File(tin.get_input_matrix(),tin.get_output_matrix(),net_name,im.get_labels_matrix())
         '''try:
             net.Train()
 

@@ -145,7 +145,7 @@ class NeuNet:
                 if (self.device == 0):
                     self.neural_net.train_server(self.training_inputs,self.training_outputs,self.iteration)
                 else:
-                    self.neural_net.CUDA_train(self.training_inputs,self.training_outputs,self.iteration)
+                    self.neural_net.CUDA_train_Server(self.training_inputs,self.training_outputs,self.iteration)
             else:
                 self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
 
