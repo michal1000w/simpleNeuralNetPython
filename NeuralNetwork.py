@@ -7,11 +7,12 @@ from multiprocessing.managers import BaseManager
 from itertools import product, repeat
 import os
 import time
+from colorama import Fore, Back, Style
 #CUDA
 import cupy as cp
 
 class NeuralNetwork:
-    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int,threads:int,force:bool,test_inputs:[],test_outputs:[],hidden_Layout:Matrix.Matrix):
+    def __init__(self,neuron_inputs:int,neuron_count:int,seed:int,threads:int,force:bool,test_inputs:[],test_outputs:[],hidden_Layout:Matrix.Matrix,print_synaptic = True):
         random.seed(seed)
         self.SEED = seed
         self.neuron_count = []
@@ -45,6 +46,7 @@ class NeuralNetwork:
         self.all_layer_weights = []
         self.all_layer_weights_single = []
         self.parameter_b = []
+        self.print_synaptic = print_synaptic
         #GPU
         self.all_synaptic_weights = manager.list()
         self.average_weight_cuda = []
@@ -74,9 +76,10 @@ class NeuralNetwork:
             self.neuron_inputs.append(int(hiddenL[i][0]))
             self.neuron_count.append(int(hiddenL[i-1][0]))
 
-        print("Hidden layout: ")
-        for i in range(self.layers_count - 1):
-            print(self.neuron_inputs[i],self.neuron_count[i])
+        if (self.print_synaptic):
+            print("Hidden layout: ")
+            for i in range(self.layers_count - 1):
+                print(self.neuron_inputs[i],self.neuron_count[i])
 
     def generate_synaptic_weights(self):
         self.all_layer_weights = []
@@ -107,6 +110,9 @@ class NeuralNetwork:
             self.all_layer_weights.append(self.synaptic_weights)
             self.all_layer_weights_single.append(self.synaptic_weights_single)
             self.all_synaptic_weights.append(self.Matrix_to_cupy_single(self.synaptic_weights))
+
+    def print_synaptic_set(self,set:bool):
+        self.print_synaptic = set
 
     def generate_parameter_b(self):
         for z in range(self.layers_count - 1):
@@ -140,7 +146,7 @@ class NeuralNetwork:
 
     def set_name(self,name:str):
         self.name = name
-        print("[NeuNet]  Name set:",name)
+        print(Fore.CYAN + "[NeuNet]" + Fore.RESET + "  Name set:",name)
 
     def set_iter(self,iter:int):
         self.iter = iter
@@ -259,7 +265,7 @@ class NeuralNetwork:
             self.all_layer_weights = self.all_layer_weights_single
 
             if (kbhit()): #przerwanie
-                print(" [przerwanie] ", end="", flush=True)
+                print(Fore.RED + " [przerwanie] " + Fore.RESET, end="", flush=True)
                 break
         
         print(" 100% ]")
@@ -355,7 +361,7 @@ class NeuralNetwork:
     def Matrix_to_cupy(self,train_inputs:Matrix.Matrix,train_outputs:Matrix.Matrix,synaptic_weights:[]):
         #time
         start = time.perf_counter()
-        print("Copying data to GPU...")
+        print(Fore.LIGHTBLUE_EX + "Copying data to GPU..." + Fore.RESET)
         
         #inputs to cp
         wiersze = len(train_inputs.getArray())
@@ -416,7 +422,7 @@ class NeuralNetwork:
 
         #time
         duration = time.perf_counter() - start
-        print("Copying data done in:",duration,"s")
+        print(Fore.GREEN + "Copying data done in:" + Fore.RESET,duration,"s")
 
         return (inputs,outputs,syn_weights,t_inputs,t_outputs)
 
@@ -555,7 +561,7 @@ class NeuralNetwork:
 
 
             if (kbhit()): #przerwanie
-                print(" [przerwanie] ",end="",flush=True)
+                print(Fore.RED + " [przerwanie] " + Fore.RESET,end="",flush=True)
                 break
 
 
@@ -612,7 +618,7 @@ class NeuralNetwork:
         return 1
 
     def CUDA_train_Server_Fast(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
-        print("Starting CUDA server...")
+        print(Fore.LIGHTBLUE_EX + "Starting CUDA server..." + Fore.RESET)
         cp.cuda.Device(0).use()
 
         #################CUDA KERNELS######################
@@ -647,7 +653,7 @@ class NeuralNetwork:
         #przechodzenie na tryb jednordzeniowy gdy mało danych
         if (cpu_count == 1):
             self.CUDA_train(training_inputs,training_outputs,iterations)
-            print("Training is done")
+            print(Fore.GREEN + "Training is done" + Fore.RESET)
             ex = Export(self.name)
             ex.save_weights(self.all_layer_weights)
         else:
@@ -661,7 +667,7 @@ class NeuralNetwork:
                 left_size = 0
                 cores_used = data_count
 
-            print("\n[Creating Batches]")
+            print(Fore.LIGHTBLUE_EX + "\n[Creating Batches]" + Fore.RESET)
             #print("CPU Threads: ",os.cpu_count())
             print("Data count: ",data_count)
             print("Batch size: ",batch_size)
@@ -781,12 +787,9 @@ class NeuralNetwork:
                     if (ID >= cores_used):
                         ID = 0
                     if (kbhit()):
-                        print(" [przerwanie]", end="",flush=True)
+                        print(Fore.RED + " [przerwanie]" + Fore.RESET, end="",flush=True)
                         break
-
-
                 if (kbhit()):
-                    print(" [przerwanie]", end="",flush=True)
                     break
 
                 #combine batches
@@ -813,13 +816,13 @@ class NeuralNetwork:
             self.all_layer_weights = self.Convert_Weights(self.average_weight_cuda)
             self.synaptic_weights = self.Convert_Weights(self.average_weight_cuda)
             
-            print("Training is done")
+            print(Fore.GREEN + "Training is done" + Fore.RESET)
             mempool.free_all_blocks() #free memory
             ex = Export(self.name)
             ex.save_weights(self.all_layer_weights)
 
     def CUDA_train_Server(self,training_inputs:Matrix.Matrix,training_outputs:Matrix.Matrix,iterations:int):
-        print("Starting CUDA server...")
+        print(Fore.LIGHTBLUE_EX + "Starting CUDA server..." + Fore.RESET)
         cp.cuda.Device(0).use()
 
         #################CUDA KERNELS######################
@@ -854,7 +857,7 @@ class NeuralNetwork:
         #przechodzenie na tryb jednordzeniowy gdy mało danych
         if (cpu_count == 1):
             self.CUDA_train(training_inputs,training_outputs,iterations)
-            print("Training is done")
+            print(Fore.GREEN + "Training is done" + Fore.RESET)
             ex = Export(self.name)
             ex.save_weights(self.all_layer_weights)
         else:
@@ -868,7 +871,7 @@ class NeuralNetwork:
                 left_size = 0
                 cores_used = data_count
 
-            print("\n[Creating Batches]")
+            print(Fore.LIGHTBLUE_EX + "\n[Creating Batches]" + Fore.RESET)
             #print("CPU Threads: ",os.cpu_count())
             print("Data count: ",data_count)
             print("Batch size: ",batch_size)
@@ -970,13 +973,12 @@ class NeuralNetwork:
                 for i in range(cores_used):
                     self.CUDA_train_batch(batches_in[i],batches_out[i],Iter,i,sigmoid,sigmoid_derivative,lock)
                     if (kbhit()):
-                        print(" [przerwanie]", end="",flush=True)
+                        print(Fore.RED + " [przerwanie]" + Fore.RESET, end="",flush=True)
                         break
 
-
-                if (kbhit()):
-                    print(" [przerwanie]", end="",flush=True)
+                if(kbhit()):
                     break
+
 
                 #combine batches
                 
@@ -1000,7 +1002,7 @@ class NeuralNetwork:
             self.all_layer_weights = self.Convert_Weights(self.average_weight_cuda)
             self.synaptic_weights = self.Convert_Weights(self.average_weight_cuda)
             
-            print("Training is done")
+            print(Fore.GREEN + "Training is done" + Fore.RESET)
             mempool.free_all_blocks() #free memory
             ex = Export(self.name)
             ex.save_weights(self.all_layer_weights)
@@ -1135,7 +1137,7 @@ class NeuralNetwork:
             output = 1
         else:
             output = 0
-        mnoznik = 1600
+        mnoznik = 62
 
         if (not(self.force == True and self.threads > 0)):   
             for i in range(data_count):
@@ -1164,7 +1166,7 @@ class NeuralNetwork:
         #przechodzenie na tryb jednordzeniowy jeżeli mało danych
         if (cpu_count == 1):
             self.train(training_inputs,training_outputs,iterations)
-            print("Training is done")
+            print(Fore.GREEN + "Training is done" + Fore.RESET)
 
             ex = Export(self.name)
             ex.save_weights(self.all_layer_weights)
@@ -1178,7 +1180,7 @@ class NeuralNetwork:
                 left_size = 0
                 cores_used = data_count
 
-            print("\n[Creating Batches]")
+            print(Fore.LIGHTBLUE_EX + "\n[Creating Batches]" + Fore.RESET)
             print("CPU Threads: ",os.cpu_count())
             print("Data count: ",data_count)
             print("Batch size: ",batch_size)
@@ -1304,7 +1306,7 @@ class NeuralNetwork:
 
 
                 if (kbhit()): #przerwanie
-                    print(" [przerwanie] ", end="", flush=True)
+                    print(Fore.RED + " [przerwanie] " + Fore.RESET, end="", flush=True)
                     break
 
                 #combine batches OLD
@@ -1405,7 +1407,7 @@ class NeuralNetwork:
                 self.all_layer_weights[i] = self.average_weight[i]
                 self.synaptic_weights = self.average_weight[i]
 
-            print("Training is done")
+            print(Fore.GREEN + "Training is done" + Fore.RESET)
 
             ex = Export(self.name)
 

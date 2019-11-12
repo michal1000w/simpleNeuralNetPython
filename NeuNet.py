@@ -2,6 +2,7 @@ import time
 import Matrix
 import NeuralNetwork
 from Import import Think_File
+from colorama import Fore, Back, Style
 
 class NeuNet:
     def __init__(self,experimental=False,sigm = True):
@@ -12,7 +13,7 @@ class NeuNet:
         self.test_inputs = []
         self.test_outputs = []
 
-        self.ID = "[NeuNet] "
+        self.ID = Fore.CYAN + "[NeuNet] " + Fore.RESET
         self.sigm = sigm
         self.iteration = 0
         self.setup = False
@@ -34,20 +35,29 @@ class NeuNet:
         print(self.ID,"Created instance")
 
     def input(self,training_data:str):
-        print(self.ID,"Adding training input data")
+        print(self.ID,"Adding training input data",flush=True)
+        start = time.perf_counter()
+
         self.training_inputs.add(training_data)
 
         if (self.sigm):
             print(self.ID,"Using sigmoid function on training input data")
             self.training_inputs = self.training_inputs.sigmoid()
+        
+        print(self.ID, Fore.GREEN + "Done" + Fore.RESET + " in: ",(time.perf_counter() - start),"s",flush = True)
 
     def output(self,training_output:str):
-        print(self.ID,"Adding training output data")
+        print(self.ID,"Adding training output data",flush=True)
+        start = time.perf_counter()
+
         self.training_outputs.add(training_output)
         self.training_outputs = self.training_outputs.T()
 
+        print(self.ID, Fore.GREEN + "Done" + Fore.RESET + " in: ",(time.perf_counter() - start),"s",flush = True)
+
     def print_synaptic_set(self,printS:bool):
         self.print_synaptic = printS
+        self.neural_net.print_synaptic_set(printS)
 
     def labels(self,names:str):
         print(self.ID,"Adding labels")
@@ -121,10 +131,10 @@ class NeuNet:
             print(self.ID,"Setting up NeuralNetwork")
 
             if(self.experimental):
-                print(self.ID,"!!!!Experimental mode enable (may cause some bugs)!!!!")
+                print(self.ID,Fore.RED + "!!!!Experimental mode enable (may cause some bugs)!!!!" + Fore.RESET)
 
             
-            self.neural_net = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force,self.test_inputs,self.test_outputs,self.hidden_Layout)
+            self.neural_net = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force,self.test_inputs,self.test_outputs,self.hidden_Layout,self.print_synaptic)
             self.neural_net.add_names(self.names)
 
             if (self.print_synaptic):
@@ -156,12 +166,13 @@ class NeuNet:
                 self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
 
             durationTh = (time.perf_counter() - start_time)
+            print(self.ID,Fore.GREEN + "Succeeded" + Fore.RESET + " in time: [ ",end="")
             if (durationTh < 60):
-                print(self.ID,"Succeeded in time: [",durationTh,"] s \n")
+                print(durationTh,"] s \n")
             else:
                 minutes = int(durationTh / 60)
                 seconds = durationTh % 60
-                print(self.ID,"Succeeded in time: [",str(minutes) + " min " + str(seconds),"s ] \n")
+                print(str(minutes) + " min " + str(seconds),"s ] \n")
 
             if (self.print_synaptic):
                 print(self.ID,"New synaptic weights after training: ")
@@ -170,7 +181,7 @@ class NeuNet:
 
             return 1
         else:
-            print(self.ID,"Training failed. (Try Setup first)")
+            print(self.ID,Fore.RED + "Training failed. (Try Setup first)" + Fore.RESET)
             return 0
         return 0
 

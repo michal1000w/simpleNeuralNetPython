@@ -1,4 +1,8 @@
 import Matrix
+import time
+from colorama import Fore, Back, Style
+
+main_color = Fore.LIGHTBLUE_EX
 
 class Import:
     def __init__(self,path:str):
@@ -10,6 +14,8 @@ class Import:
         self.labels_matrix = []
 
         try:
+            print(main_color + "Reading file...")
+            start = time.perf_counter()
             #odczyt z pliku
             file = open(path,"r")
             data = file.read()
@@ -64,9 +70,11 @@ class Import:
 
             #print(self.Input)
             #print(self.Output)
+            print(Fore.GREEN + "Done" + Fore.RESET,end="")
+            print(" in:",(time.perf_counter() - start),"s")
 
         except:
-            print("Can't open the file:",path)
+            print(Fore.RED + "Can't open the file:",path,Fore.RESET)
 
     def get_input(self):
         length = len(self.Input)
@@ -186,7 +194,7 @@ class NetImport:
                         self.Weights.append(fragment)
                     i1 += 1'''
         except Exception as e:
-            print("Can't open the file:",path, e)
+            print(Fore.RED + "Can't open the file:",path,Fore.RESET, e)
 
     def get_weights(self):
         length = len(self.Weights)
@@ -203,7 +211,7 @@ class Export:
         self.path = "OUTPUT\Saved_Networks\\" + filename + ".txt"
 
     def save_weights(self,weights:[]):
-        print("Saving weights...")
+        print(main_color + "Saving weights..." + Fore.RESET)
         print("Path: ",self.path)
 
         try:
@@ -211,9 +219,9 @@ class Export:
             for i in weights:
                 f.write("{ " + i.getString() + " }\n")
             f.close()
-            print("Saved")
+            print(Fore.GREEN + "Saved" + Fore.RESET)
         except:
-            print("Writing failed")
+            print(Fore.RED + "Writing failed",Fore.RESET)
 
 class Think_File:
     def __init__(self,filename:str):
@@ -222,7 +230,7 @@ class Think_File:
         self.info_path = "OUTPUT\Labeled_Data\\" + filename + "-info.txt"
 
     def save_think_output(self,inp:[],out:[],predicted:[],labels:str,labels_matrix:[]):
-        print("Saving Think Output...")
+        print(main_color + "Saving Think Output..." + Fore.RESET)
         print("Path: ",self.path)
 
         data_len = int(len(inp))
@@ -234,9 +242,9 @@ class Think_File:
             for i in range(data_len):
                 f.write(inp[i].getString() + " " + out[i].getString(True) + " " + predicted_simple[i].getString(True)+"\n")
             f.close()
-            print("Saved")
+            print(Fore.GREEN + "Saved" + Fore.RESET)
         except Exception as e:
-            print("Writing failed " + e)
+            print(Fore.RED + "Writing failed " +Fore.RESET + e)
 
         
         #preparing confusion matrix
@@ -282,7 +290,7 @@ class Think_File:
         print("\n\n")
         #zapisywanie
 
-        print("Saving Test Info...")
+        print(main_color + "Saving Test Info..." + Fore.RESET)
         print("Path: ", self.info_path)
 
         try:
@@ -301,9 +309,9 @@ class Think_File:
             f.write("\nSkuteczność: " + str(procent_poprawnych) + "%")
 
             f.close()
-            print("Saved")
+            print(Fore.GREEN + "Saved" + Fore.RESET)
         except:
-            print("Writing failed")
+            print(Fore.RED + "Writing failed" + Fore.RESET)
 
     def simplify_predicted(self,predicted:[]):
         print("Simplifying predicted model...")

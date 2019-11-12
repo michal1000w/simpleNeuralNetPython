@@ -2,13 +2,17 @@ from Matrix import Matrix
 import NeuralNetwork
 import NeuNet
 import Import
+
+from colorama import init, Fore, Back, Style
    
 def hidden_Layout(data:str):
     output = Matrix(data)
     return output
 
 #main
-if __name__ == '__main__':  
+if __name__ == '__main__':
+    init() #For colors
+
     experimental = True
 
     if (0):
@@ -18,6 +22,8 @@ if __name__ == '__main__':
 
     name = "GamesForAi"
     net_name = "GamesForAi-gpu"
+
+    #name = "kr-vs-kp"
 
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data

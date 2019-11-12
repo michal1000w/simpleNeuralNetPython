@@ -1,0 +1,7 @@
+Confusion matrix: 
+      [winX][winO][Draw]
+[winX][25, 8, 0]
+[winO][7, 22, 0]
+[Draw][1, 0, 0]
+
+Skutecznoœæ: 74.60317460317461%
