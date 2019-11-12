@@ -14,10 +14,11 @@ if __name__ == '__main__':
     if (0):
         net = NeuNet.NeuNet() #dla IRIS
     else:
-        net = NeuNet.NeuNet(True,False) #dla kr-vs-kp
+        net = NeuNet.NeuNet(True,False) #dla kr-vs-kp, kółko i krzyżyk
 
-    name = "kr-vs-kp"
-    net_name = "Abalone-gpu"
+    name = "GamesForAi"
+    net_name = "GamesForAi-gpu"
+
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data
 
@@ -25,12 +26,14 @@ if __name__ == '__main__':
     net.output(im.get_output())
     net.labels(im.get_labels())
 
-    net.iterations(60000) #30000 iris
+    net.iterations(10000) #30000 iris
     #net.seed(4) #optional
 
     #experimental
     net.go_experimental(experimental)
-    net.set_threads(0)
+    net.print_synaptic_set(False)
+
+    net.set_threads(0) #196 dla GamesForAI
     net.force_threads(True)  #to set up more threads than CPU cores
 
     tin = Import.Import("INPUT\Test_Data\\" + name + ".txt") #import test_data
@@ -38,16 +41,17 @@ if __name__ == '__main__':
 
     
     #net.add_hidden_layout(Matrix("[0][6][0]"))
-    net.add_hidden_layout(Matrix("[0][5][0]")) #dla kr-vs-kp
+    #net.add_hidden_layout(Matrix("[0][5][0]")) #dla kr-vs-kp
     #net.add_hidden_layout(Matrix("[0][6][2][0]"))
     #net.add_hidden_layout(Matrix("[0][0]")) #no hidden
     #net.add_hidden_layout(Matrix("[0][5][3][2][3][3][0]")) #niby abalone ale nie działa za dobrze
     #net.add_hidden_layout(Matrix("[0][5][3][2][0]"))
-    #net.add_hidden_layout(Matrix("[0][6][4][0]"))
+    net.add_hidden_layout(Matrix("[0][25][12][12][12][5][5][5][5][0]"))
+    
 
     net.Setup()
     net.set_name(net_name) #set name for the network
-    net.set_iter(100)
+    net.set_iter(100) #100
     net.set_device("gpu") # "cpu" "gpu"
 
     #load network from file

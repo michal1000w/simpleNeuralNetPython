@@ -20,6 +20,7 @@ class NeuNet:
         self.threads = 0
         self.experimental = experimental
         self.force = False
+        self.print_synaptic = True
 
         #self.weights = Matrix.Matrix("")
         self.weights = []
@@ -44,6 +45,9 @@ class NeuNet:
         print(self.ID,"Adding training output data")
         self.training_outputs.add(training_output)
         self.training_outputs = self.training_outputs.T()
+
+    def print_synaptic_set(self,printS:bool):
+        self.print_synaptic = printS
 
     def labels(self,names:str):
         print(self.ID,"Adding labels")
@@ -123,8 +127,9 @@ class NeuNet:
             self.neural_net = NeuralNetwork.NeuralNetwork(self.training_inputs.kolumny,self.training_outputs.kolumny,self.SEED,self.threads,self.force,self.test_inputs,self.test_outputs,self.hidden_Layout)
             self.neural_net.add_names(self.names)
 
-            print(self.ID,"Random generated synaptic weights:")
-            self.neural_net.print_synaptic_weights()
+            if (self.print_synaptic):
+                print(self.ID,"Random generated synaptic weights:")
+                self.neural_net.print_synaptic_weights()
             #self.neural_net.print_parameter_b()
             print("")
             self.setup = True
@@ -145,15 +150,22 @@ class NeuNet:
                 if (self.device == 0):
                     self.neural_net.train_server(self.training_inputs,self.training_outputs,self.iteration)
                 else:
-                    self.neural_net.CUDA_train_Server(self.training_inputs,self.training_outputs,self.iteration)
+                    #self.neural_net.CUDA_train_Server(self.training_inputs,self.training_outputs,self.iteration)
+                    self.neural_net.CUDA_train_Server_Fast(self.training_inputs,self.training_outputs,self.iteration)
             else:
                 self.neural_net.train(self.training_inputs,self.training_outputs,self.iteration)
 
             durationTh = (time.perf_counter() - start_time)
-            print(self.ID,"Succeeded in time: [",durationTh,"] s \n")
+            if (durationTh < 60):
+                print(self.ID,"Succeeded in time: [",durationTh,"] s \n")
+            else:
+                minutes = int(durationTh / 60)
+                seconds = durationTh % 60
+                print(self.ID,"Succeeded in time: [",str(minutes) + " min " + str(seconds),"s ] \n")
 
-            print(self.ID,"New synaptic weights after training: ")
-            self.neural_net.print_synaptic_weights()
+            if (self.print_synaptic):
+                print(self.ID,"New synaptic weights after training: ")
+                self.neural_net.print_synaptic_weights()
             print("\n")
 
             return 1
