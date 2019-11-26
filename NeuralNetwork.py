@@ -52,6 +52,9 @@ class NeuralNetwork:
         self.average_weight_cuda = []
         self.mean_weights_multi = manager.list()
 
+        self.arythmetic_mean = False
+        self.float_reduction = False
+
         #deep learning
         self.layers_count = len(self.hidden_Layout.getArray())
         self.layers_count_hidden = 0
@@ -76,6 +79,7 @@ class NeuralNetwork:
             self.neuron_inputs.append(int(hiddenL[i][0]))
             self.neuron_count.append(int(hiddenL[i-1][0]))
 
+        print("Layers count: ",self.layers_count - 1)
         if (self.print_synaptic):
             print("Hidden layout: ")
             for i in range(self.layers_count - 1):
@@ -114,6 +118,12 @@ class NeuralNetwork:
     def print_synaptic_set(self,set:bool):
         self.print_synaptic = set
 
+    def force_arythmetic_mean(self,force):
+        self.arythmetic_mean = force
+
+    def force_float_reduction(self,force):
+        self.float_reduction = force
+
     def generate_parameter_b(self):
         for z in range(self.layers_count - 1):
             weights = ""
@@ -125,6 +135,8 @@ class NeuralNetwork:
 
     def load_synaptic_weights(self,weights:[]):
         self.all_layer_weights = weights
+        for i in range(len(weights)):
+            self.all_synaptic_weights.append(self.Matrix_to_cupy_single(weights[i]))
     
     def print_parameter_b(self):
         print("\nParameter b: \n")
@@ -273,7 +285,7 @@ class NeuralNetwork:
 
     def think(self,inputs:Matrix.Matrix,realOutput = Matrix.Matrix("[]")):
         self.wynik = inputs
-        for z in range( self.layers_count_hidden + 1):
+        for z in range( self.layers_count - 1):
             self.wynik = (self.wynik * self.all_layer_weights[z]).sigmoid() #oblicza spodziewany wynik
             
             
@@ -339,10 +351,28 @@ class NeuralNetwork:
         wyniki = []
         #obliczanie wyników dla danych testowych
         for i in range(data_count):
-            wyniki.append(self.think(test_inputs[i],Matrix.Matrix("[]")))
+            wyniki.append(self.think(test_inputs[i]))
 
         return wyniki
 
+    def test_training_cuda(self,test_inputs:[],test_outputs:[]):
+        data_count = len(test_inputs)
+        wyniki = []
+        syn_weights,t_inputs = self.Matrix_to_cupy_test(test_inputs,self.all_layer_weights)
+        sigmoid = cp.ElementwiseKernel(
+                'float32 in',
+                'float32 out',
+                '''
+                float h = exp(-1 * in);
+                out = 1 / (1 + h);
+                ''',
+                'sigmoid'
+            )
+
+        for i in range(data_count):
+            wyniki.append(self.think_CUDA(t_inputs[i],syn_weights,sigmoid))
+
+        return self.Convert_Output(wyniki)
 
 
     #CUDA compute
@@ -350,7 +380,10 @@ class NeuralNetwork:
         wiersze = len(inputs.getArray())
         kolumny = len(inputs.getArray()[0])
 
-        output = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+        if (self.float_reduction):
+            output = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+        else:
+            output = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
         for i in range(wiersze):
             for j in range(kolumny):
                 output[i][j] = inputs.getArray()[i][j]
@@ -367,7 +400,10 @@ class NeuralNetwork:
         wiersze = len(train_inputs.getArray())
         kolumny = len(train_inputs.getArray()[0])
 
-        inputs = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+        if (self.float_reduction):
+            inputs = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+        else:
+            inputs = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
         for i in range(wiersze):
             for j in range(kolumny):
                 inputs[i][j] = train_inputs.getArray()[i][j]
@@ -376,7 +412,10 @@ class NeuralNetwork:
         wiersze = len(train_outputs.getArray())
         kolumny = len(train_outputs.getArray()[0])
 
-        outputs = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+        if (self.float_reduction):
+            outputs = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+        else:
+            outputs = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
         for i in range(wiersze):
             for j in range(kolumny):
                 outputs[i][j] = train_outputs.getArray()[i][j]
@@ -388,7 +427,10 @@ class NeuralNetwork:
             wiersze = len(synaptic_weights[z].getArray())
             kolumny = len(synaptic_weights[z].getArray()[0])
 
-            weights = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+            if (self.float_reduction):
+                weights = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+            else:
+                weights = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
             for i in range(wiersze):
                 for j in range(kolumny):
                     weights[i][j] = synaptic_weights[z].getArray()[i][j]
@@ -401,7 +443,10 @@ class NeuralNetwork:
             wiersze = len(self.test_inputs[z].getArray())
             kolumny = len(self.test_inputs[z].getArray()[0])
 
-            mat = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+            if (self.float_reduction):
+                mat = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+            else:
+                mat = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
             for i in range(wiersze):
                 for j in range(kolumny):
                     mat[i][j] = self.test_inputs[z].getArray()[i][j]
@@ -414,7 +459,10 @@ class NeuralNetwork:
             wiersze = len(self.test_outputs[z].getArray())
             kolumny = len(self.test_outputs[z].getArray()[0])
 
-            mat = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+            if (self.float_reduction):
+                mat = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+            else:
+                mat = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
             for i in range(wiersze):
                 for j in range(kolumny):
                     mat[i][j] = self.test_outputs[z].getArray()[i][j]
@@ -425,6 +473,41 @@ class NeuralNetwork:
         print(Fore.GREEN + "Copying data done in:" + Fore.RESET,duration,"s")
 
         return (inputs,outputs,syn_weights,t_inputs,t_outputs)
+
+    def Matrix_to_cupy_test(self,test_inputs,synaptic_weights):
+        #synaptic_weights to cp
+        syn_weights = []
+        layers = len(synaptic_weights)
+        for z in range(layers):
+            wiersze = len(synaptic_weights[z].getArray())
+            kolumny = len(synaptic_weights[z].getArray()[0])
+
+            if (self.float_reduction):
+                weights = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+            else:
+                weights = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+            for i in range(wiersze):
+                for j in range(kolumny):
+                    weights[i][j] = synaptic_weights[z].getArray()[i][j]
+            syn_weights.append(weights)
+
+        #test_inputs
+        t_inputs = []
+        length = len(test_inputs)
+        for z in range(length):
+            wiersze = len(test_inputs[z].getArray())
+            kolumny = len(test_inputs[z].getArray()[0])
+
+            if (self.float_reduction):
+                mat = cp.arange(wiersze*kolumny,dtype=cp.float64).reshape(wiersze,kolumny)
+            else:
+                mat = cp.arange(wiersze*kolumny,dtype=cp.float32).reshape(wiersze,kolumny)
+            for i in range(wiersze):
+                for j in range(kolumny):
+                    mat[i][j] = test_inputs[z].getArray()[i][j]
+            t_inputs.append(mat)
+
+        return syn_weights, t_inputs
 
     def Convert_Weights(self,synaptic_weights):
         syn_weights = []
@@ -441,6 +524,21 @@ class NeuralNetwork:
             syn_weights.append(Matrix.Matrix("",wiersze,kolumny,mat))
 
         return syn_weights
+
+    def Convert_Output(self,t_output:[]):
+        output = []
+        for z in range(len(t_output)):
+            wiersze = len(t_output[z])
+            kolumny = len(t_output[z][0])
+            mat = []
+            for i in range(wiersze):
+                rowList = []
+                for j in range(kolumny):
+                    rowList.append(t_output[z][i][j])
+                mat.append(rowList)
+            output.append(Matrix.Matrix("",wiersze,kolumny,mat))
+        
+        return output
 
     def think_CUDA(self,inputs,synaptic_weights,sigmoid,layers = 1,ID = 0):
         output = inputs
@@ -492,23 +590,42 @@ class NeuralNetwork:
         layers_number = self.layers_count - 1
 
         ###############   KERNELS   #################
-        sigmoid = cp.ElementwiseKernel(
-            'float32 in',
-            'float32 out',
-            '''
-            float h = exp(-1 * in);
-            out = 1 / (1 + h);
-            ''',
-            'sigmoid'
-        )
-        sigmoid_derivative = cp.ElementwiseKernel(
-            'float32 in',
-            'float32 out',
-            '''
-            out = in * (1 - in);
-            ''',
-            'sigmoid_derivative'
-        )
+        if (self.float_reduction):  
+            sigmoid = cp.ElementwiseKernel(
+                'float64 in',
+                'float64 out',
+                '''
+                float h = exp(-1 * in);
+                out = 1 / (1 + h);
+                ''',
+                'sigmoid'
+            )
+            sigmoid_derivative = cp.ElementwiseKernel(
+                'float64 in',
+                'float64 out',
+                '''
+                out = in * (1 - in);
+                ''',
+                'sigmoid_derivative'
+            )
+        else:
+            sigmoid = cp.ElementwiseKernel(
+                'float32 in',
+                'float32 out',
+                '''
+                float h = exp(-1 * in);
+                out = 1 / (1 + h);
+                ''',
+                'sigmoid'
+            )
+            sigmoid_derivative = cp.ElementwiseKernel(
+                'float32 in',
+                'float32 out',
+                '''
+                out = in * (1 - in);
+                ''',
+                'sigmoid_derivative'
+            )
         #############################################
 
         #trening
@@ -570,7 +687,7 @@ class NeuralNetwork:
 
 
 
-    def CUDA_train_batch(self,training_inputs,training_outputs,iterations:int,ID,sigmoid,sigmoid_derivative,lock):
+    def CUDA_train_batch(self,training_inputs,training_outputs,iterations:int,ID,sigmoid,sigmoid_derivative,sigmDot,lock):
         layers_number = self.layers_count - 1
         synaptic_weights = []
 
@@ -587,9 +704,22 @@ class NeuralNetwork:
             output = training_inputs
             for z in range(layers_number):
                 output = sigmoid(output.dot(synaptic_weights[z]))
+                
+                ''' #Tutaj coś nie działa i są ogromne wyniki
+                wiersze = cp.int32(output.size/output[0].size)
+                kolumny = cp.int32(synaptic_weights[z][0].size)
+                N = cp.int32(wiersze * kolumny)
+                out = cp.arange(N,dtype=cp.float32).reshape(wiersze,kolumny)
+                
+                sigmDot((wiersze,),(kolumny,),(output,synaptic_weights[z],out),shared_mem = N)
+                output = sigmoid(out)
+                '''
+                
                 wyniki_czastkowe.append(output)
 
+            
             delta = []
+            
 
             #layer ostatni
             error = training_outputs - output
@@ -622,23 +752,69 @@ class NeuralNetwork:
         cp.cuda.Device(0).use()
 
         #################CUDA KERNELS######################
-        sigmoid = cp.ElementwiseKernel(
-            'float32 in',
-            'float32 out',
-            '''
-            float h = exp(-1 * in);
-            out = 1 / (1 + h);
-            ''',
-            'sigmoid'
-        )
-        sigmoid_derivative = cp.ElementwiseKernel(
-            'float32 in',
-            'float32 out',
-            '''
-            out = in * (1 - in);
-            ''',
-            'sigmoid_derivative'
-        )
+        if (self.float_reduction):  
+            sigmoid = cp.ElementwiseKernel(
+                'float64 in',
+                'float64 out',
+                '''
+                float h = exp(-1 * in);
+                out = 1 / (1 + h);
+                ''',
+                'sigmoid'
+            )
+            sigmoid_derivative = cp.ElementwiseKernel(
+                'float64 in',
+                'float64 out',
+                '''
+                out = in * (1 - in);
+                ''',
+                'sigmoid_derivative'
+            )
+        else:
+            sigmoid = cp.ElementwiseKernel(
+                'float32 in',
+                'float32 out',
+                '''
+                float h = exp(-1 * in);
+                out = 1 / (1 + h);
+                ''',
+                'sigmoid'
+            )
+            sigmoid_derivative = cp.ElementwiseKernel(
+                'float32 in',
+                'float32 out',
+                '''
+                out = in * (1 - in);
+                ''',
+                'sigmoid_derivative'
+            )
+            
+            
+            sigmDot = cp.RawKernel( #coś tutaj nie działa
+                r'''
+                extern "C" __global__
+                void sigmDot(const float* a,const float* b, float* out){
+                    extern __shared__ float array[];
+
+                    const int n = blockDim.x * blockDim.y;
+                    float* sh_data = (float*)array;
+                    float* temp = (float*)&sh_data[n];
+                    
+                    temp[threadIdx.x] = a[threadIdx.x] * b[threadIdx.x];
+
+                    __syncthreads();
+
+                    if (0 == threadIdx.x){
+                        float sum = 0;
+                        for (int i = 0; i < n; i++)
+                            sum += temp[i];
+                        *out = 1 / (1 + (exp(-1*sum)));
+                    }
+                }
+                ''',
+                'sigmDot'
+            )
+            
         ###################################################
 
         #Przygotowanie zmiennych
@@ -777,12 +953,15 @@ class NeuralNetwork:
 
                 weights = []
                 for i in range(hidden_Layout_count):
-                    weights.append(cp.zeros((self.neuron_inputs[i] * self.neuron_count[i]),dtype=cp.float32).reshape(self.neuron_count[i],self.neuron_inputs[i]))
+                    if (self.float_reduction):
+                        weights.append(cp.zeros((self.neuron_inputs[i] * self.neuron_count[i]),dtype=cp.float64).reshape(self.neuron_count[i],self.neuron_inputs[i]))
+                    else:
+                        weights.append(cp.zeros((self.neuron_inputs[i] * self.neuron_count[i]),dtype=cp.float32).reshape(self.neuron_count[i],self.neuron_inputs[i]))
 
                 #single thread
                 
                 for i in range(Batch_Size):
-                    self.CUDA_train_batch(batches_in[ID],batches_out[ID],Iter,ID,sigmoid,sigmoid_derivative,lock)
+                    self.CUDA_train_batch(batches_in[ID],batches_out[ID],Iter,ID,sigmoid,sigmoid_derivative,sigmDot,lock)
                     ID += 1
                     if (ID >= cores_used):
                         ID = 0
@@ -794,27 +973,38 @@ class NeuralNetwork:
 
                 #combine batches
                 
-                #średnia ważona
-                for z in range(hidden_Layout_count):
-                    mean_weights = []
-                    mean_weights_sum = 0.0
+                if (self.arythmetic_mean):  
+                    #średnia arytmetyczna
+                    for z in range(hidden_Layout_count):
+                        iterator = (ID - Batch_Size) % cores_used
+                        for i in range(Batch_Size):
+                            weights[z] += self.all_synaptic_batches[iterator * hidden_Layout_count + z]
+                            iterator = (iterator + 1)%cores_used
+                        weights[z] = weights[z]/Batch_Size
+                        self.average_weight_cuda[z] = weights[z]
+                else:   
+                    #średnia ważona
+                    for z in range(hidden_Layout_count):
+                        mean_weights = []
+                        mean_weights_sum = 0.0
 
-                    iterator = (ID - Batch_Size) % cores_used
-                    for i in range(Batch_Size):
-                        mean_weights.append(1 / self.create_loss_weights_cuda(t_in,t_out,self.all_synaptic_batches,hidden_Layout_count,iterator,sigmoid))
-                        weights[z] += (self.all_synaptic_batches[iterator * hidden_Layout_count + z] * mean_weights[i])
-                        mean_weights_sum += mean_weights[i]
-                        iterator = (iterator + 1) % cores_used
+                        iterator = (ID - Batch_Size) % cores_used
+                        for i in range(Batch_Size):
+                            mean_weights.append(1 / self.create_loss_weights_cuda(t_in,t_out,self.all_synaptic_batches,hidden_Layout_count,iterator,sigmoid))
+                            weights[z] += (self.all_synaptic_batches[iterator * hidden_Layout_count + z] * mean_weights[i])
+                            mean_weights_sum += mean_weights[i]
+                            iterator = (iterator + 1) % cores_used
 
-                    weights[z] = weights[z]/mean_weights_sum
+                        weights[z] = weights[z]/mean_weights_sum
 
-                    self.average_weight_cuda[z] = weights[z]
+                        self.average_weight_cuda[z] = weights[z]
 
                 
 
             print(" 100% ]")
             self.all_layer_weights = self.Convert_Weights(self.average_weight_cuda)
             self.synaptic_weights = self.Convert_Weights(self.average_weight_cuda)
+            
             
             print(Fore.GREEN + "Training is done" + Fore.RESET)
             mempool.free_all_blocks() #free memory
@@ -826,23 +1016,42 @@ class NeuralNetwork:
         cp.cuda.Device(0).use()
 
         #################CUDA KERNELS######################
-        sigmoid = cp.ElementwiseKernel(
-            'float32 in',
-            'float32 out',
-            '''
-            float h = exp(-1 * in);
-            out = 1 / (1 + h);
-            ''',
-            'sigmoid'
-        )
-        sigmoid_derivative = cp.ElementwiseKernel(
-            'float32 in',
-            'float32 out',
-            '''
-            out = in * (1 - in);
-            ''',
-            'sigmoid_derivative'
-        )
+        if (self.float_reduction):   
+            sigmoid = cp.ElementwiseKernel(
+                'float64 in',
+                'float64 out',
+                '''
+                float h = exp(-1 * in);
+                out = 1 / (1 + h);
+                ''',
+                'sigmoid'
+            )
+            sigmoid_derivative = cp.ElementwiseKernel(
+                'float64 in',
+                'float64 out',
+                '''
+                out = in * (1 - in);
+                ''',
+                'sigmoid_derivative'
+            )
+        else:
+            sigmoid = cp.ElementwiseKernel(
+                'float32 in',
+                'float32 out',
+                '''
+                float h = exp(-1 * in);
+                out = 1 / (1 + h);
+                ''',
+                'sigmoid'
+            )
+            sigmoid_derivative = cp.ElementwiseKernel(
+                'float32 in',
+                'float32 out',
+                '''
+                out = in * (1 - in);
+                ''',
+                'sigmoid_derivative'
+            )
         ###################################################
 
         #Przygotowanie zmiennych
@@ -966,7 +1175,10 @@ class NeuralNetwork:
 
                 weights = []
                 for i in range(hidden_Layout_count):
-                    weights.append(cp.zeros((self.neuron_inputs[i] * self.neuron_count[i]),dtype=cp.float32).reshape(self.neuron_count[i],self.neuron_inputs[i]))
+                    if (self.float_reduction):
+                        weights.append(cp.zeros((self.neuron_inputs[i] * self.neuron_count[i]),dtype=cp.float64).reshape(self.neuron_count[i],self.neuron_inputs[i]))
+                    else:
+                        weights.append(cp.zeros((self.neuron_inputs[i] * self.neuron_count[i]),dtype=cp.float32).reshape(self.neuron_count[i],self.neuron_inputs[i]))
 
                 #single thread
                 

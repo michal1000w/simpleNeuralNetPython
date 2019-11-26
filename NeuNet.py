@@ -22,6 +22,7 @@ class NeuNet:
         self.experimental = experimental
         self.force = False
         self.print_synaptic = True
+        self.arythmetic_mean = False
 
         #self.weights = Matrix.Matrix("")
         self.weights = []
@@ -105,6 +106,17 @@ class NeuNet:
     
     def force_threads(self,force):
         self.force = force
+    
+    def force_arythmetic_mean(self,force):
+        if (force):
+            print(self.ID , Fore.RED + "Using arythmetic mean (may be less accurate)" + Fore.RESET)
+        self.arythmetic_mean = force
+        self.neural_net.force_arythmetic_mean(force)
+
+    def force_float_reduction(self,force):
+        if (force):
+            print(self.ID , Fore.RED + "Reducing float accuracy (may be less accurate)" + Fore.RESET)
+        self.neural_net.force_float_reduction(not(force))
     
     def go_experimental(self,experimental:bool):
         self.experimental = experimental
@@ -212,7 +224,11 @@ class NeuNet:
         print("Loss: ",loss)
         print("\n\n")
 
-        wyniki = self.neural_net.test_training(test_inputs,test_outputs)
+        if (self.device == 0):
+            wyniki = self.neural_net.test_training(test_inputs,test_outputs)
+        else:
+            wyniki = self.neural_net.test_training_cuda(test_inputs,test_outputs)
+
         tf = Think_File(filename)
         tf.save_think_output(inp,test_outputs,wyniki,self.names,labels_matrix)
 
