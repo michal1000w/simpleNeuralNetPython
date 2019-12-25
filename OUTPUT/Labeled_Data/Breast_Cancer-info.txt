@@ -1,6 +1,6 @@
 Confusion matrix: 
          [malignant][benign]
-[malignant][16, 19]
-[benign][2, 62]
+[malignant][32, 3]
+[benign][5, 59]
 
-Skutecznoœæ: 78.78787878787878%
+Skutecznoœæ: 91.91919191919192%

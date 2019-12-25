@@ -44,8 +44,16 @@ if __name__ == '__main__':
     name = "kr-vs-kp"
     net_name = "Kr_test_1"
     '''
+    '''
     name = "breast_cancer"
-    net_name = "Breast_Cancer"
+    net_name = "Breast_Cancer_2"
+    '''
+    '''
+    name = "breast_cancer_2"
+    net_name = "Breast_Cancer_2_2"
+    '''
+    name = "or"
+    net_name = "Or-2"
 
     im = Import.Import("INPUT\Training_Data\\" + name + ".txt") #import training data
 
@@ -53,12 +61,12 @@ if __name__ == '__main__':
     net.output(im.get_output())
     net.labels(im.get_labels())
 
-    net.iterations(60000) #30000 iris
+    net.iterations(10000) #30000 iris
     #net.seed(4) #optional
 
     #experimental
     net.go_experimental(experimental)
-    net.print_synaptic_set(False)
+    net.print_synaptic_set(True)
 
     net.set_threads(0) #196 dla GamesForAI
     net.force_threads(True)  #to set up more threads than CPU cores
@@ -79,19 +87,22 @@ if __name__ == '__main__':
     #net.add_hidden_layout(Matrix("[0][4][0]")) #Xor,And,Or 100% 10000 iteracji
 
     #breast cancer
-    #net.add_hidden_layout(Matrix("[0][64][64][32][32][9][5][1][0]"))
-    #net.add_hidden_layout(Matrix("[0][31][15][5][1][0]"))
-    net.add_hidden_layout(Matrix("[0][32][16][1]")) #82% dla [10] i iter 20
+    #net.add_hidden_layout(Matrix("[0][32][10][8][0]"))
+    #net.add_hidden_layout(Matrix("[0][32][10][0]")) #60 000 92% max arytmetyczna 34 wątki iter 20
     
+    #breast cancer 2
+    #net.add_hidden_layout(Matrix("[0][10][5][1][0]")) #98% 0, iter 100 arytmetyczna
+    
+    net.add_hidden_layout(Matrix("[0][4][3][6][0]"))
 
     net.Setup()
     net.set_name(net_name) #set name for the network
     net.set_iter(100) #100
-    net.set_device("gpu") # "cpu" "gpu"
+    net.set_device("cpu") # "cpu" "gpu"
 
     #Speed setting
     net.force_arythmetic_mean(True)
-    net.force_float_reduction(True) #float32 vs float64
+    net.force_float_reduction(True) #float32 vs float64  #false tymaczasowo nie działa
 
 
 

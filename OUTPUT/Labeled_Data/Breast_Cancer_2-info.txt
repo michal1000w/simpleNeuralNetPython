@@ -1,0 +1,6 @@
+Confusion matrix: 
+         [malignant][benign]
+[malignant][44, 0]
+[benign][2, 51]
+
+Skutecznoœæ: 97.9381443298969%
